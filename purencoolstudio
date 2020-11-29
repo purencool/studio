@@ -4,13 +4,16 @@ FUNCTION_CALL=$1
 FIRST_ARG=$2
 SECOND_ARG=$3
 
-
+# Makes a cleaner looking result in the terminal
+echo ""
 
 ### Help
 # To use the Help follow the example below
-# 1. To see the entire help use the following command <purencoolstudio help>
-# 2. To see one help item the following command <purencoolstudio help <text>>
-
+#
+# @command
+# 1.  <purencoolstudio help> to see everything
+# 2.  <purencoolstudio help <title eg, Help >> to see item
+#
 function helpText {
   sed -e "/### $FIRST_ARG/,/##/!d" purencoolstudio
 }
@@ -19,14 +22,25 @@ function helpText {
 
 ### DockerInstalled
 # Test to see if docker is installed
+#
+# @command <di>
+#
 ##
 function dockerInstalled {
- echo "docker installed"
+
+ if echo "$(docker -v)" | grep -q "v1ersion"; then
+    echo "true"
+ else
+    echo "false"
+ fi
 }
 
 
 ### PullDockerImages
 # The following docker images need to be pulled
+#
+# @command <pdi>
+#
 ##
 function pullDockerImages {
   echo "docker pull images"
@@ -37,12 +51,32 @@ function pullDockerImages {
 if [ "$FUNCTION_CALL" = 'manual'  ]
 then
    helpText
+
 elif [ "$FUNCTION_CALL" = 'di'  ]
 then
-  dockerInstalled
+    dockerDi=$(dockerInstalled)
+    echo "Docker is installed: "$dockerDi
+    if [ "$dockerDi" = 'false' ]
+    then
+       echo  "In order to run this container you'll need docker installed."
+       echo  "  1. https://docs.docker.com/windows/started"
+       echo  "  2. https://docs.docker.com/mac/started/"
+       echo  "  3. https://docs.docker.com/windows/started"
+    fi
+
 elif [ "$FUNCTION_CALL" = 'pdi'  ]
 then
    pullDockerImages
+
 else
   helpText
+
 fi
+
+# Makes a cleaner looking result in the terminal
+echo ""
+
+
+# docker run --name=purencool_studio -d -p 3000:3000 -t purencool/purencool_studio:latest
+#docker stop purencool_studio
+#docker start purencool_studio
