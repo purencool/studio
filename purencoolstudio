@@ -45,29 +45,110 @@ function pullDockerImages {
   echo "docker pull images"
 }
 
+### InstallPurencoolStudioSoftware
+# Install Purencool Studio software from your computer.
+#
+# @command <sis>
+#
+##
+function installPurencoolStudioSoftware {
+  docker pull purencool/purencool_studio:latest
+  echo "Purencool Studio software has been installed"
+}
+
+
+### InstallAndStartPurencoolStudioSoftware
+# Install Purencool Studio software from your computer.
+#
+# @command <sisap>
+#
+##
+function installPurencoolStudioSoftwareAndPS {
+  installPurencoolStudioSoftware
+  installPurencoolStudioPS
+}
+
+
+### InstallPurencoolStudioPS
+# Install Purencool Studio PS.
+#
+# @command <sip>
+#
+##
+function installPurencoolStudioPS {
+  docker run --name=purencool_studio -d -p 3000:3000 -t purencool/purencool_studio:latest
+  echo "Purencool Studio PS is now installed and running"
+}
+
+
+
+### RemovePurencoolStudioSoftware
+# Removes Purencool Studio software from your computer.
+#
+# @command <srs>
+#
+##
+function removePurencoolStudioSoftware {
+  docker rmi -f purencool/purencool_studio
+  echo "Purencool Studio software has been removed or does not exist"
+}
+
+
+### RemovePurencoolStudioPS
+# Remove the studio docker process
+#
+# @command <srp>
+#
+##
+function removePurencoolStudioPS {
+  echo  $(docker rm purencool_studio)" has been removed"
+}
+
+### RunningPurencoolStudioPS
+# Remove the studio docker process
+#
+# @command <rps>
+#
+##
+function runningPurencoolStudioPS {
+   docker ps -f name=purencool_studio | grep -w purencool_studio
+}
+
 
 ### StartPurencoolStudio
-# Start the studio docker image
+# Start the studio docker software
 #
 # @command <sst>
 #
 ##
 function startPurencoolStudio {
-  docker start purencool_studio
-  docker ps -f name=purencool_studio | grep -w purencool_studio
+   echo  $(docker start purencool_studio)" has been started"
+   docker ps -f name=purencool_studio | grep -w purencool_studio
 }
 
 
 
 ### StopPurencoolStudio
-# Stop the studio docker image
+# Stop the studio docker software
 #
 # @command <ssp>
 #
 ##
 function stopPurencoolStudio {
-  docker stop purencool_studio
-  docker ps -f name=purencool_studio | grep -w purencool_studio
+ echo  $(docker stop purencool_studio)" has been stopped"
+}
+
+### StopAndRemovePurencoolStudioPSAndSoftware
+# Remove all PS and Software
+#
+# @command <ra>
+#
+##
+function stopAndRemovePurencoolStudioPSAndSoftware {
+  stopPurencoolStudio
+  removePurencoolStudioPS
+  removePurencoolStudioSoftware
+
 }
 
 
@@ -87,6 +168,30 @@ elif [ "$FUNCTION_CALL" = 'di'  ]; then
        echo  "  3. https://docs.docker.com/windows/started"
      fi
 
+elif [ "$FUNCTION_CALL" = 'sis'  ]; then
+
+     installPurencoolStudioSoftware
+
+elif [ "$FUNCTION_CALL" = 'sip'  ]; then
+
+     installPurencoolStudioPS
+
+elif [ "$FUNCTION_CALL" = 'sisap'  ]; then
+
+     installPurencoolStudioSoftwareAndPS
+
+elif [ "$FUNCTION_CALL" = 'srp'  ]; then
+
+     removePurencoolStudioPS
+
+elif [ "$FUNCTION_CALL" = 'srs'  ]; then
+
+     removePurencoolStudioSoftware
+
+elif [ "$FUNCTION_CALL" = 'rps'  ]; then
+
+     runningPurencoolStudioPS
+
 elif [ "$FUNCTION_CALL" = 'sst'  ]; then
 
      startPurencoolStudio
@@ -94,6 +199,10 @@ elif [ "$FUNCTION_CALL" = 'sst'  ]; then
 elif [ "$FUNCTION_CALL" = 'ssp'  ]; then
 
      stopPurencoolStudio
+
+elif [ "$FUNCTION_CALL" = 'ra'  ]; then
+
+     stopAndRemovePurencoolStudioPSAndSoftware
 
 elif [ "$FUNCTION_CALL" = 'pdi'  ]; then
 
@@ -109,13 +218,21 @@ fi
 echo ""
 
 ### Commands
-#  The list below are commands that can be used and have help information
+#  The list below are functions that can be used to help manage Purencool Studio
+#  from the commandline. To use the command type <purencoolstudio help <title eg, Help >>
+#
 #  1. Help
 #  2. DockerInstalled
-#  3. PullDockerImages
+#  3. InstallPurencoolStudioSoftware
+#  4. InstallPurencoolStudioPS
+#  5. PullDockerImages
+#  6. RemovePurencoolStudioPS
+#  7. RemovePurencoolStudioSoftware
+#  8. RunningPurencoolStudioPS
+#  9. StartPurencoolStudio
+#  10. StopPurencoolStudio
+#  11. StopAndRemovePurencoolStudioPSAndSoftware
 ##
 
 
-
-# docker run --name=purencool_studio -d -p 3000:3000 -t purencool/purencool_studio:latest
 
