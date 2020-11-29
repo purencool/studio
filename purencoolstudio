@@ -27,8 +27,7 @@ function helpText {
 #
 ##
 function dockerInstalled {
-
- if echo "$(docker -v)" | grep -q "v1ersion"; then
+ if echo "$(docker -v)" | grep -q "version"; then
     echo "true"
  else
     echo "false"
@@ -47,36 +46,76 @@ function pullDockerImages {
 }
 
 
+### StartPurencoolStudio
+# Start the studio docker image
+#
+# @command <sst>
+#
+##
+function startPurencoolStudio {
+  docker start purencool_studio
+  docker ps -f name=purencool_studio | grep -w purencool_studio
+}
 
-if [ "$FUNCTION_CALL" = 'manual'  ]
-then
-   helpText
 
-elif [ "$FUNCTION_CALL" = 'di'  ]
-then
-    dockerDi=$(dockerInstalled)
-    echo "Docker is installed: "$dockerDi
-    if [ "$dockerDi" = 'false' ]
-    then
+
+### StopPurencoolStudio
+# Stop the studio docker image
+#
+# @command <ssp>
+#
+##
+function stopPurencoolStudio {
+  docker stop purencool_studio
+  docker ps -f name=purencool_studio | grep -w purencool_studio
+}
+
+
+
+if [ "$FUNCTION_CALL" = 'help'  ]; then
+
+     helpText
+
+elif [ "$FUNCTION_CALL" = 'di'  ]; then
+
+     dockerDi=$(dockerInstalled)
+     echo "Docker is installed: "$dockerDi
+     if [ "$dockerDi" = 'false' ]; then
        echo  "In order to run this container you'll need docker installed."
        echo  "  1. https://docs.docker.com/windows/started"
        echo  "  2. https://docs.docker.com/mac/started/"
        echo  "  3. https://docs.docker.com/windows/started"
-    fi
+     fi
 
-elif [ "$FUNCTION_CALL" = 'pdi'  ]
-then
-   pullDockerImages
+elif [ "$FUNCTION_CALL" = 'sst'  ]; then
+
+     startPurencoolStudio
+
+elif [ "$FUNCTION_CALL" = 'ssp'  ]; then
+
+     stopPurencoolStudio
+
+elif [ "$FUNCTION_CALL" = 'pdi'  ]; then
+
+     pullDockerImages
 
 else
-  helpText
+
+     helpText
 
 fi
 
 # Makes a cleaner looking result in the terminal
 echo ""
 
+### Commands
+#  The list below are commands that can be used and have help information
+#  1. Help
+#  2. DockerInstalled
+#  3. PullDockerImages
+##
+
+
 
 # docker run --name=purencool_studio -d -p 3000:3000 -t purencool/purencool_studio:latest
-#docker stop purencool_studio
-#docker start purencool_studio
+
