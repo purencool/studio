@@ -1,0 +1,48 @@
+#!/bin/bash
+
+FUNCTION_CALL=$1
+FIRST_ARG=$2
+SECOND_ARG=$3
+
+
+
+### Help
+# To use the Help follow the example below
+# 1. To see the entire help use the following command <purencoolstudio help>
+# 2. To see one help item the following command <purencoolstudio help <text>>
+
+function helpText {
+  sed -e "/### $FIRST_ARG/,/##/!d" purencoolstudio
+}
+##
+
+
+### DockerInstalled
+# Test to see if docker is installed
+##
+function dockerInstalled {
+ echo "docker installed"
+}
+
+
+### PullDockerImages
+# The following docker images need to be pulled
+##
+function pullDockerImages {
+  echo "docker pull images"
+}
+
+
+
+if [ "$FUNCTION_CALL" = 'manual'  ]
+then
+   helpText
+elif [ "$FUNCTION_CALL" = 'di'  ]
+then
+  dockerInstalled
+elif [ "$FUNCTION_CALL" = 'pdi'  ]
+then
+   pullDockerImages
+else
+  helpText
+fi
