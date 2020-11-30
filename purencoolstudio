@@ -52,7 +52,30 @@ function pullDockerImages {
 #
 ##
 function installPurencoolStudioSoftware {
-  docker pull purencool/purencool_studio:latest
+  echo "Current path: "$(pwd)
+  echo "Please provide a path for data storage or use "$HOME"/purencool_studio by pressing enter: "
+  read pathToBeUsed
+
+  if [ -z "$pathToBeUsed" ]; then
+     mkdir "${HOME}/purencool_studio"
+     mkdir "${HOME}/purencool_studio/sites"
+     mkdir "${HOME}/purencool_studio/.system"
+     mkdir "${HOME}/purencool_studio/.system/incoming"
+     mkdir "${HOME}/purencool_studio/.system/history"
+     mkdir "${HOME}/purencool_studio/.system/logs"
+     echo "A directory was created in: "${HOME}"/purencool_studio"
+  else
+     mkdir "$pathToBeUsed"
+     mkdir "$pathToBeUsed/sites"
+     mkdir "$pathToBeUsed/.system"
+     mkdir "$pathToBeUsed/.system/incoming"
+     mkdir "$pathToBeUsed/.system/history"
+     mkdir "$pathToBeUsed/.system/logs"
+
+    echo "A directory was created in: $pathToBeUsed"
+  fi
+
+  # docker pull purencool/purencool_studio:latest
   echo "Purencool Studio software has been installed"
 }
 
