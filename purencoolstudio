@@ -35,16 +35,6 @@ function dockerInstalled {
 }
 
 
-### PullDockerImages
-# The following docker images need to be pulled
-#
-# @command <pdi>
-#
-##
-function pullDockerImages {
-  echo "docker pull images"
-}
-
 ### InstallPurencoolStudioSoftware
 # Install Purencool Studio software from your computer.
 #
@@ -56,26 +46,21 @@ function installPurencoolStudioSoftware {
   echo "Please provide a path for data storage or use "$HOME"/purencool_studio by pressing enter: "
   read pathToBeUsed
 
+  mkdir "${HOME}/purencool_studio"
+  mkdir "${HOME}/purencool_studio/.config"
+  touch "${HOME}/purencool_studio/.config/config"
+
   if [ -z "$pathToBeUsed" ]; then
-     mkdir "${HOME}/purencool_studio"
-     mkdir "${HOME}/purencool_studio/sites"
-     mkdir "${HOME}/purencool_studio/.system"
-     mkdir "${HOME}/purencool_studio/.system/incoming"
-     mkdir "${HOME}/purencool_studio/.system/history"
-     mkdir "${HOME}/purencool_studio/.system/logs"
+     echo "base_path::"${HOME}/purencool_studio >> ${HOME}/purencool_studio/.config/config
      echo "A directory was created in: "${HOME}"/purencool_studio"
   else
+     echo "base_path::"$pathToBeUsed >> ${HOME}/purencool_studio/.config/config
      mkdir "$pathToBeUsed"
-     mkdir "$pathToBeUsed/sites"
-     mkdir "$pathToBeUsed/.system"
-     mkdir "$pathToBeUsed/.system/incoming"
-     mkdir "$pathToBeUsed/.system/history"
-     mkdir "$pathToBeUsed/.system/logs"
-
     echo "A directory was created in: $pathToBeUsed"
   fi
 
-  # docker pull purencool/purencool_studio:latest
+  docker pull purencool/purencool_studio_system:latest
+  docker pull purencool/purencool_studio:latest
   echo "Purencool Studio software has been installed"
 }
 
@@ -103,6 +88,17 @@ function installPurencoolStudioPS {
   echo "Purencool Studio PS is now installed and running"
 }
 
+### InstallPurencoolStudioSystemsPS
+# Install Purencool Studio System PS.
+#
+# @command <sisp>
+#
+##
+function installPurencoolStudioSystemPS {
+  docker run --mount type=bind,source="$(pwd)"/test,target=/user/src/app/mntdir --name=purencool_studio_system -d  -t purencool_studio_system:latest
+  echo "Purencool Studio PS is now installed and running"
+}
+
 
 
 ### RemovePurencoolStudioSoftware
@@ -127,6 +123,35 @@ function removePurencoolStudioPS {
   echo  $(docker rm purencool_studio)" has been removed"
 }
 
+
+
+
+
+
+
+### RemovePurencoolStudioSystemSoftware
+# Removes Purencool Studio System software from your computer.
+#
+# @command <srss>
+#
+##
+function removePurencoolStudioSystemSoftware {
+  docker rmi -f purencool/purencool_studio_system
+  echo "Purencool Studio System software has been removed or does not exist"
+}
+
+
+### RemovePurencoolStudioSystemPS
+# Remove the studio system docker process
+#
+# @command <srsp>
+#
+##
+function removePurencoolStudioSystemPS {
+  echo  $(docker rm purencool_studio_system)" has been removed"
+}
+
+
 ### RunningPurencoolStudioPS
 # Remove the studio docker process
 #
@@ -135,6 +160,17 @@ function removePurencoolStudioPS {
 ##
 function runningPurencoolStudioPS {
    docker ps -f name=purencool_studio | grep -w purencool_studio
+}
+
+
+### RunningPurencoolStudioSystemPS
+# Remove the studio system docker process
+#
+# @command <rpss>
+#
+##
+function runningPurencoolStudioSystemPS {
+   docker ps -f name=purencool_studio_system | grep -w purencool_studio_system
 }
 
 
@@ -150,6 +186,18 @@ function startPurencoolStudio {
 }
 
 
+### StartPurencoolStudioSystem
+# Start the studio system docker software
+#
+# @command <ssts>
+#
+##
+function startPurencoolStudioSystem {
+   echo  $(docker start purencool_studio_system)" has been started"
+   docker ps -f name=purencool_studio_system | grep -w purencool_studio_system
+}
+
+
 
 ### StopPurencoolStudio
 # Stop the studio docker software
@@ -161,6 +209,18 @@ function stopPurencoolStudio {
  echo  $(docker stop purencool_studio)" has been stopped"
 }
 
+
+### StopPurencoolStudioSystem
+# Stop the studio system docker software
+#
+# @command <ssps>
+#
+##
+function stopPurencoolStudioSystem {
+ echo  $(docker stop purencool_studio_system)" has been stopped"
+}
+
+
 ### StopAndRemovePurencoolStudioPSAndSoftware
 # Remove all PS and Software
 #
@@ -171,6 +231,9 @@ function stopAndRemovePurencoolStudioPSAndSoftware {
   stopPurencoolStudio
   removePurencoolStudioPS
   removePurencoolStudioSoftware
+  stopPurencoolStudioSystem
+  removePurencoolStudioSystemPS
+  removePurencoolStudioSystemSoftware
 
 }
 
@@ -199,6 +262,10 @@ elif [ "$FUNCTION_CALL" = 'sip'  ]; then
 
      installPurencoolStudioPS
 
+elif [ "$FUNCTION_CALL" = 'sisp'  ]; then
+
+     installPurencoolStudioSystemPS
+
 elif [ "$FUNCTION_CALL" = 'sisap'  ]; then
 
      installPurencoolStudioSoftwareAndPS
@@ -207,29 +274,47 @@ elif [ "$FUNCTION_CALL" = 'srp'  ]; then
 
      removePurencoolStudioPS
 
+elif [ "$FUNCTION_CALL" = 'srsp'  ]; then
+
+     removePurencoolStudioSystemPS
+
+
 elif [ "$FUNCTION_CALL" = 'srs'  ]; then
 
      removePurencoolStudioSoftware
+
+elif [ "$FUNCTION_CALL" = 'srss'  ]; then
+
+     removePurencoolStudioSystemSoftware
+
 
 elif [ "$FUNCTION_CALL" = 'rps'  ]; then
 
      runningPurencoolStudioPS
 
+elif [ "$FUNCTION_CALL" = 'rpss'  ]; then
+
+     runningPurencoolStudioSystemPS
+
 elif [ "$FUNCTION_CALL" = 'sst'  ]; then
 
      startPurencoolStudio
+
+elif [ "$FUNCTION_CALL" = 'ssts'  ]; then
+
+     startPurencoolStudioSystem
 
 elif [ "$FUNCTION_CALL" = 'ssp'  ]; then
 
      stopPurencoolStudio
 
+elif [ "$FUNCTION_CALL" = 'ssps'  ]; then
+
+     stopPurencoolStudioSystem
+
 elif [ "$FUNCTION_CALL" = 'ra'  ]; then
 
      stopAndRemovePurencoolStudioPSAndSoftware
-
-elif [ "$FUNCTION_CALL" = 'pdi'  ]; then
-
-     pullDockerImages
 
 else
 
@@ -248,13 +333,18 @@ echo ""
 #  2. DockerInstalled
 #  3. InstallPurencoolStudioSoftware
 #  4. InstallPurencoolStudioPS
-#  5. PullDockerImages
+#  5. InstallPurencoolStudioSystemPS --beta
 #  6. RemovePurencoolStudioPS
-#  7. RemovePurencoolStudioSoftware
-#  8. RunningPurencoolStudioPS
-#  9. StartPurencoolStudio
-#  10. StopPurencoolStudio
-#  11. StopAndRemovePurencoolStudioPSAndSoftware
+#  7. RemovePurencoolStudioSystemPS  --beta
+#  8. RemovePurencoolStudioSoftware
+#  9. RemovePurencoolStudioSystemSoftware --beta
+#  10. RunningPurencoolStudioPS
+#  11. RunningPurencoolStudioSystemPS --beta
+#  12. StartPurencoolStudio
+#  13. StartPurencoolStudioSystem --beta
+#  14. StopPurencoolStudio
+#  15. StopPurencoolStudioSystem --beta
+#  16. StopAndRemovePurencoolStudioPSAndSoftware
 ##
 
 
