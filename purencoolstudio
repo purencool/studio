@@ -7,6 +7,20 @@ SECOND_ARG=$3
 # Makes a cleaner looking result in the terminal
 echo ""
 
+### GetConfig
+# Gets Purencool Studios Global config
+###
+function getConfig {
+  local cofigRequestStr="$1"
+	[[ -z $cofigRequestStr ]] && { echo "${FUNCNAME}(): config string not specified"; exit 1; }
+  while IFS= read -r line; do
+    echo ">>$line<<";
+  done < ${HOME}/purencool_studio/.config/config
+}
+
+
+
+
 ### Help
 # To use the Help follow the example below
 #
@@ -331,7 +345,7 @@ echo ""
 #
 #  1. Help
 #  2. DockerInstalled
-#  3. InstallPurencoolStudioSoftware
+#  3. InstallPurencoolStudioSoftware (sis)
 #  4. InstallPurencoolStudioPS
 #  5. InstallPurencoolStudioSystemPS --beta
 #  6. RemovePurencoolStudioPS
@@ -347,5 +361,8 @@ echo ""
 #  16. StopAndRemovePurencoolStudioPSAndSoftware
 ##
 
+
+# global function tests
+#getConfig base_path
 
 
