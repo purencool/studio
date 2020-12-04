@@ -11,14 +11,10 @@ echo ""
 # Gets Purencool Studios Global config
 ###
 function getConfig {
-  local cofigRequestStr="$1"
-	[[ -z $cofigRequestStr ]] && { echo "${FUNCNAME}(): config string not specified"; exit 1; }
-  while IFS= read -r line; do
-    echo ">>$line<<";
-  done < ${HOME}/purencool_studio/.config/config
+  local configRequestStr="$1"
+	[[ -z $configRequestStr ]] && { echo "${FUNCNAME}(): config string not specified"; exit 1; }
+  sed -e 's#.*::\(\)#\1#' <<< "$(grep "^$configRequestStr" ${HOME}/purencool_studio/.config/config)"
 }
-
-
 
 
 ### Help
@@ -362,7 +358,8 @@ echo ""
 ##
 
 
-# global function tests
+# Global function tests
+#getConfig
 #getConfig base_path
 
 
