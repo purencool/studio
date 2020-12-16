@@ -71,21 +71,28 @@ function installPurencoolStudioSoftware() {
   read pathToBeUsed
 
   mkdir "${HOME}/purencool_studio"
+  mkdir "${HOME}/purencool_studio/.system"
+  mkdir "${HOME}/purencool_studio/.system/history"
+  mkdir "${HOME}/purencool_studio/.system/history/purencool_studio"
+  mkdir "${HOME}/purencool_studio/.system/history/purencool_studio_ide"
+  mkdir "${HOME}/purencool_studio/.system/purencool_studio"
+  mkdir "${HOME}/purencool_studio/.system/purencool_studio_system"
   mkdir "${HOME}/purencool_studio/.config"
   touch "${HOME}/purencool_studio/.config/config"
+  echo "ide_port::3001" >>${HOME}/purencool_studio/.config/config
+  echo "software_port::3000" >>${HOME}/purencool_studio/.config/config
 
   if [ -z "$pathToBeUsed" ]; then
     echo "base_path::"${HOME}/purencool_studio >>${HOME}/purencool_studio/.config/config
     echo "A directory was created in: "${HOME}"/purencool_studio"
+    mkdir "${HOME}/purencool_studio/sites"
   else
     echo "base_path::"$pathToBeUsed >>${HOME}/purencool_studio/.config/config
     mkdir "$pathToBeUsed"
+    mkdir "$pathToBeUsed""/sites"
     echo "A directory was created in: $pathToBeUsed"
   fi
 
-this needs the extra config added below on install
-ide_port::3001
-software_port::3000
 
 
   docker pull purencool/purencool_studio_system:latest
