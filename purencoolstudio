@@ -52,7 +52,10 @@ function dockerInstalled() {
 #
 ##
 function IDEPurencoolStudioPS() {
-  docker run -it -d -p 3001:3000  --name=purencool_studio_ide -v "$(pwd):/home/project:cached" theiaide/theia-php:latest
+  VAR_BASE_PATH=$(getConfig base_path)
+  VAR_IDE_PORT=$(getConfig ide_port)
+  #echo $VAR_BASE_PATH;
+  docker run -it -d -p $VAR_IDE_PORT:3000  --name=purencool_studio_ide -v "$VAR_BASE_PATH:/home/project:cached" theiaide/theia-php:latest
 }
 
 
@@ -80,8 +83,14 @@ function installPurencoolStudioSoftware() {
     echo "A directory was created in: $pathToBeUsed"
   fi
 
+this needs the extra config added below on install
+ide_port::3001
+software_port::3000
+
+
   docker pull purencool/purencool_studio_system:latest
   docker pull purencool/purencool_studio:latest
+  docker pull theiaide/theia-php:latest
   echo "Purencool Studio software has been installed"
 }
 
@@ -103,7 +112,8 @@ function installPurencoolStudioSoftwareAndPS() {
 #
 ##
 function installPurencoolStudioPS() {
-  docker run --name=purencool_studio -d -p 3000:3001 -t purencool/purencool_studio:latest
+  VAR_PURENCOOL_STUDIO_PORT=$(getConfig purencool_studio_port)
+  docker run --name=purencool_studio -d -p $VAR_PURENCOOL_STUDIO_PORT:3000 -t purencool/purencool_studio:latest
   echo "Purencool Studio PS is now installed and running"
 }
 
