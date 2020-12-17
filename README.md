@@ -1,10 +1,21 @@
 # Purencool Studio
 
+#### Commands
+
+##### Start ide
+
+```
+purencoolstudio ide $(pwd) 5001 mytest_john
+```
+
+
 #### Manual
 
 ```
 sed -e '/###/,/##/!d' purencoolstudio
 ```
+
+
 
 #### Development
 

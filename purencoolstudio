@@ -3,6 +3,8 @@
 FUNCTION_CALL=$1
 FIRST_ARG=$2
 SECOND_ARG=$3
+THIRD_ARG=$4
+FOURTH_ARG=$5
 
 # Makes a cleaner looking result in the terminal
 echo ""
@@ -46,16 +48,52 @@ function dockerInstalled() {
 }
 
 ### IDEPurencoolStudioPS
-# Install IDE.
+# Start IDE.
 #
 # @command <ide>
 #
 ##
 function IDEPurencoolStudioPS() {
-  VAR_BASE_PATH=$(getConfig base_path)
-  VAR_IDE_PORT=$(getConfig ide_port)
-  #echo $VAR_BASE_PATH;
-  docker run -it -d -p $VAR_IDE_PORT:3000  --name=purencool_studio_ide -v "$VAR_BASE_PATH:/home/project:cached" theiaide/theia-php:latest
+
+  if [ -z "$1" ]; then
+    VAR_BASE_PATH=$(getConfig base_path)
+  else
+    VAR_BASE_PATH=$1
+  fi
+
+  if [ -z "$2" ]; then
+    VAR_IDE_PORT=$(getConfig ide_port)
+  else
+    VAR_IDE_PORT=$2
+  fi
+
+  if [ -z "$3" ]; then
+    VAR_IDE_NAME="purencool_studio_ide_"$((RANDOM%40))
+  else
+    VAR_IDE_NAME=$3
+  fi
+
+   if [ -z "$4" ]; then
+    VAR_IDE_TYPE="theiaide/theia-php:latest"
+  else
+    VAR_IDE_TYPE=$4
+  fi
+
+  #echo $VAR_IDE_PORT:3000  --name=$VAR_IDE_NAME -v "$VAR_BASE_PATH:/home/project:cached" $VAR_IDE_TYPE
+  docker run -it -d -p $VAR_IDE_PORT:3000  --name=$VAR_IDE_NAME -v "$VAR_BASE_PATH:/home/project:cached" $VAR_IDE_TYPE
+
+  echo "http://localhost:$VAR_IDE_PORT"
+}
+
+### IDEPurencoolStudioPSRemove
+# Remove  IDE.
+#
+# @command <ider>
+#
+##
+function IDEPurencoolStudioPSRemove() {
+  docker stop $(docker ps -a -q)
+  docker rm $(docker ps -a -q)
 }
 
 
@@ -274,7 +312,11 @@ elif [ "$FUNCTION_CALL" = 'di' ]; then
 
 elif [ "$FUNCTION_CALL" = 'ide' ]; then
 
-  IDEPurencoolStudioPS
+  IDEPurencoolStudioPS $FIRST_ARG $SECOND_ARG $THIRD_ARG $FOURTH_ARG
+
+elif [ "$FUNCTION_CALL" = 'ider' ]; then
+
+  IDEPurencoolStudioPSRemove
 
 elif [ "$FUNCTION_CALL" = 'sis' ]; then
 
@@ -356,20 +398,21 @@ echo ""
 #  1. Help
 #  2. DockerInstalled
 #  3. IDEPurencoolStudioPS
-#  4. InstallPurencoolStudioSoftware <sis>
-#  5. InstallPurencoolStudioPS       <sip>
-#  6. InstallPurencoolStudioSystemPS <sisp>
-#  7. RemovePurencoolStudioPS
-#  8. RemovePurencoolStudioSystemPS  --beta
-#  9. RemovePurencoolStudioSoftware
-#  10. RemovePurencoolStudioSystemSoftware --beta
-#  11. RunningPurencoolStudioPS
-#  12. RunningPurencoolStudioSystemPS --beta
-#  13. StartPurencoolStudio
-#  14. StartPurencoolStudioSystem --beta
-#  15. StopPurencoolStudio
-#  16. StopPurencoolStudioSystem --beta
-#  17. StopAndRemovePurencoolStudioPSAndSoftware
+#  4. IDEPurencoolStudioPSRemove
+#  5. InstallPurencoolStudioSoftware <sis>
+#  6. InstallPurencoolStudioPS       <sip>
+#  7. InstallPurencoolStudioSystemPS <sisp>
+#  8. RemovePurencoolStudioPS
+#  9. RemovePurencoolStudioSystemPS  --beta
+#  10. RemovePurencoolStudioSoftware
+#  11. RemovePurencoolStudioSystemSoftware --beta
+#  12. RunningPurencoolStudioPS
+#  13. RunningPurencoolStudioSystemPS --beta
+#  14. StartPurencoolStudio
+#  15. StartPurencoolStudioSystem --beta
+#  16. StopPurencoolStudio
+#  17. StopPurencoolStudioSystem --beta
+#  18. StopAndRemovePurencoolStudioPSAndSoftware
 ##
 
 # Global function tests
