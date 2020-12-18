@@ -92,8 +92,16 @@ function IDEPurencoolStudioPS() {
 #
 ##
 function IDEPurencoolStudioPSRemove() {
-  docker stop $(docker ps -a -q)
-  docker rm $(docker ps -a -q)
+
+  if [ -z "$1" ]; then
+    docker stop $1
+    docker rm $1
+  else
+    docker stop $(docker ps -a -q)
+    docker rm $(docker ps -a -q)
+  fi
+  
+ 
 }
 
 
@@ -316,7 +324,7 @@ elif [ "$FUNCTION_CALL" = 'ide' ]; then
 
 elif [ "$FUNCTION_CALL" = 'ider' ]; then
 
-  IDEPurencoolStudioPSRemove
+  IDEPurencoolStudioPSRemove $FIRST_ARG
 
 elif [ "$FUNCTION_CALL" = 'sis' ]; then
 
