@@ -13,6 +13,9 @@ echo ""
 #                    Purencool Script Tools                          #
 ######################################################################
 
+VERSION="0.06"
+RELEASE_NOTES="Release notes"
+
 ### Update script
 #
 #  @command
@@ -20,26 +23,36 @@ echo ""
 ###
 function selfUpdate() {
   echo "Starting self update"
-  echo "Update will be replaced in: "$(cd "$(dirname "$0")" ; pwd)"/purencoolstudio"
+  echo "Update will be replaced in: "$(
+    cd "$(dirname "$0")"
+    pwd
+  )"/purencoolstudio"
   REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
   OUTPUT_FILENAME=$(pwd)"/purencoolstudio"
   TEMP_FILE=$(pwd)"/purencoolstudio.tmp"
   if [ -n "$(which wget)" ]; then
-    wget -O $TEMP_FILE  $REQUEST_URL
-    mv $TEMP_FILE $OUTPUT_FILENAME
-    chmod 755 $OUTPUT_FILENAME
+    wget -O $TEMP_FILE $REQUEST_URL
+    cp "$TEMP_FILE" "$OUTPUT_NAME"
+    rm -f "$TEMP_FILE"
+    chmod 755 "$OUTPUT_FILENAME"
   fi
-  echo "Release notes";
-  echo "0.06"
+}
+
+### Information
+#  @command
+#  <info>
+###
+function information() {
+  echo "$VERSION";
+  echo "$RELEASE_NOTES"
 }
 
 ### install
 # Install script
 ###
-function install(){
+function install() {
   echo "I am installed"
 }
-
 
 ### Help
 # To use the Help follow the example below
@@ -68,7 +81,6 @@ function getConfig() {
   }
   sed -e 's#.*::\(\)#\1#' <<<"$(grep "^$configRequestStr" ${HOME}/purencool_studio/.config/config)"
 }
-
 
 ### DockerInstalled
 # Test to see if docker is installed
@@ -105,19 +117,19 @@ function IDEPurencoolStudioPS() {
   fi
 
   if [ -z "$3" ]; then
-    VAR_IDE_NAME="purencool_studio_ide_"$((RANDOM%40))
+    VAR_IDE_NAME="purencool_studio_ide_"$((RANDOM % 40))
   else
     VAR_IDE_NAME=$3
   fi
 
-   if [ -z "$4" ]; then
+  if [ -z "$4" ]; then
     VAR_IDE_TYPE="theiaide/theia-php:latest"
   else
     VAR_IDE_TYPE=$4
   fi
 
   #echo $VAR_IDE_PORT:3000  --name=$VAR_IDE_NAME -v "$VAR_BASE_PATH:/home/project:cached" $VAR_IDE_TYPE
-  docker run -it -d -p $VAR_IDE_PORT:3000  --name=$VAR_IDE_NAME -v "$VAR_BASE_PATH:/home/project:cached" $VAR_IDE_TYPE
+  docker run -it -d -p $VAR_IDE_PORT:3000 --name=$VAR_IDE_NAME -v "$VAR_BASE_PATH:/home/project:cached" $VAR_IDE_TYPE
 
   echo "http://localhost:$VAR_IDE_PORT"
 }
@@ -137,10 +149,8 @@ function IDEPurencoolStudioPSRemove() {
     docker stop $(docker ps -a -q)
     docker rm $(docker ps -a -q)
   fi
-  
- 
-}
 
+}
 
 ### InstallPurencoolStudioSoftware
 # Install Purencool Studio software from your computer.
@@ -175,8 +185,6 @@ function installPurencoolStudioSoftware() {
     mkdir "$pathToBeUsed""/sites"
     echo "A directory was created in: $pathToBeUsed"
   fi
-
-
 
   docker pull purencool/purencool_studio_system:latest
   docker pull purencool/purencool_studio:latest
@@ -214,7 +222,7 @@ function installPurencoolStudioPS() {
 #
 ##
 function installPurencoolStudioSystemPS() {
- getConfig base_path
+  getConfig base_path
 
   #docker run --mount type=bind,source="$(pwd)"/test,target=/user/src/app/mntdir --name=purencool_studio_system -d  -t purencool_studio_system:latest
   #echo "Purencool Studio PS is now installed and running"
@@ -429,7 +437,11 @@ elif [ "$FUNCTION_CALL" = 'ra' ]; then
 
 elif [ "$FUNCTION_CALL" = 'update' ]; then
 
-   selfUpdate
+  selfUpdate
+
+elif [ "$FUNCTION_CALL" = 'info' ]; then
+
+  information
 
 else
 
