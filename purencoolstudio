@@ -34,7 +34,7 @@ function selfUpdate() {
     fi
   fi
   echo "Release notes";
-  echo "0.01"
+  echo "0.02"
 }
 
 ### install
