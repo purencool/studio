@@ -31,7 +31,7 @@ function selfUpdate() {
     chmod 755 $OUTPUT_FILENAME
   fi
   echo "Release notes";
-  echo "0.04"
+  echo "0.05"
 }
 
 ### install
