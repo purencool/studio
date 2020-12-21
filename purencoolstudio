@@ -20,21 +20,21 @@ echo ""
 ###
 function selfUpdate() {
   echo "Starting self update"
+  echo "Update will be replaced in: "$(cd "$(dirname "$0")" ; pwd)
   readonly REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
   readonly OUTPUT_FILENAME=$(cd "$(dirname "$0")" ; pwd)"/purencoolstudio"
   readonly TEMP_FILE=$(cd "$(dirname "$0")" ; pwd)"/purencoolstudio.tmp"
   if [ -n "$(which wget)" ]; then
     wget -O $TEMP_FILE  $REQUEST_URL
     if [[ $? -eq 0 ]]; then
-      mv "${TEMP_FILE}" "${OUTPUT_FILENAME}"
-      chmod 755 "${OUTPUT_FILENAME}"
-      rm TEMP_FILE;
+      mv $TEMP_FILE $OUTPUT_FILENAME
+      chmod 755 $OUTPUT_FILENAME
     else
       return 1
     fi
   fi
   echo "Release notes";
-  echo "0.02"
+  echo "0.03"
 }
 
 ### install
