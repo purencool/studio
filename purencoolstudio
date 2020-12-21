@@ -9,17 +9,35 @@ FOURTH_ARG=$5
 # Makes a cleaner looking result in the terminal
 echo ""
 
-### GetConfig
-# Gets Purencool Studios Global config
+######################################################################
+#                    Purencool Script Tools                          #
+######################################################################
+
+### Update script
+# Updates script by running the following command "purencoolstudio self_update"
 ###
-function getConfig() {
-  local configRequestStr="$1"
-  [[ -z $configRequestStr ]] && {
-    echo "${FUNCNAME}(): config request variable not specified"
-    exit 1
-  }
-  sed -e 's#.*::\(\)#\1#' <<<"$(grep "^$configRequestStr" ${HOME}/purencool_studio/.config/config)"
+function self_update() {
+  readonly REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
+  readonly OUTPUT_FILENAME=$(cd "$(dirname "$0")" ; pwd)"/purencoolstudio"
+  readonly TEMP_FILE="${THISDIR}/tmp.file"
+  if [ -n "$(which wget)" ]; then
+    $(wget -O "${TEMP_FILE}"  "$REQUEST_URL" 2>&1)
+    if [[ $? -eq 0 ]]; then
+      mv "${TEMP_FILE}" "${OUTPUT_FILENAME}"
+      chmod 755 "${OUTPUT_FILENAME}"
+    else
+      return 1
+    fi
+  fi
 }
+
+### install
+# Install script
+###
+function install(){
+  echo "I am installed"
+}
+
 
 ### Help
 # To use the Help follow the example below
@@ -32,6 +50,23 @@ function helpText() {
   sed -e "/### $FIRST_ARG/,/##/!d" purencoolstudio
 }
 ##
+
+######################################################################
+#                    Purencool Tools                                 #
+######################################################################
+
+### GetConfig
+# Gets Purencool Studios Global config
+###
+function getConfig() {
+  local configRequestStr="$1"
+  [[ -z $configRequestStr ]] && {
+    echo "${FUNCNAME}(): config request variable not specified"
+    exit 1
+  }
+  sed -e 's#.*::\(\)#\1#' <<<"$(grep "^$configRequestStr" ${HOME}/purencool_studio/.config/config)"
+}
+
 
 ### DockerInstalled
 # Test to see if docker is installed
@@ -426,27 +461,3 @@ echo ""
 # Global function tests
 #getConfig
 getConfig base_path
-
-####################
-#
-# Update or remove script
-#
-####################
-function self_update() {
-  readonly REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
-  readonly OUTPUT_FILENAME=$(cd "$(dirname "$0")" ; pwd)"/purencoolstudio"
-  readonly TEMP_FILE="${THISDIR}/tmp.file"
-  if [ -n "$(which wget)" ]; then
-    $(wget -O "${TEMP_FILE}"  "$REQUEST_URL" 2>&1)
-    if [[ $? -eq 0 ]]; then
-      mv "${TEMP_FILE}" "${OUTPUT_FILENAME}"
-      chmod 755 "${OUTPUT_FILENAME}"
-    else
-      return 1
-    fi
-  fi
-}
-
-function install(){
-  echo "I am installed"
-}
