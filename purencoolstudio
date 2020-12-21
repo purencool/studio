@@ -22,7 +22,7 @@ function selfUpdate() {
   echo "Starting self update"
   readonly REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
   readonly OUTPUT_FILENAME=$(cd "$(dirname "$0")" ; pwd)"/purencoolstudio"
-  readonly TEMP_FILE="${THISDIR}/tmp.file"
+  readonly TEMP_FILE=$(cd "$(dirname "$0")" ; pwd)"/purencoolstudio.tmp"
   if [ -n "$(which wget)" ]; then
     $(wget -O "${TEMP_FILE}"  "$REQUEST_URL" 2>&1)
     if [[ $? -eq 0 ]]; then
