@@ -67,7 +67,7 @@ function information() {
 ##  <install>
 ###
 function install() {
-  OS_MACHINE=machineOS()
+  OS_MACHINE=machineOS
   echo $OS_MACHINE;
 }
 
