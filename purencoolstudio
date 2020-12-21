@@ -426,3 +426,23 @@ echo ""
 # Global function tests
 #getConfig
 getConfig base_path
+
+####################
+#
+# Update or remove script
+#
+####################
+function self_update() {
+  readonly REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
+  readonly OUTPUT_FILENAME=$(cd "$(dirname "$0")" ; pwd)"/purencoolstudio"
+  readonly TEMP_FILE="${THISDIR}/tmp.file"
+  if [ -n "$(which wget)" ]; then
+    $(wget -O "${TEMP_FILE}"  "$REQUEST_URL" 2>&1)
+    if [[ $? -eq 0 ]]; then
+      mv "${TEMP_FILE}" "${OUTPUT_FILENAME}"
+      chmod 755 "${OUTPUT_FILENAME}"
+    else
+      return 1
+    fi
+  fi
+}
