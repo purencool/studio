@@ -20,7 +20,7 @@ echo ""
 ###
 function selfUpdate() {
   echo "Starting self update"
-  echo "Update will be replaced in: "$(cd "$(dirname "$0")" ; pwd)
+  echo "Update will be replaced in: "$(cd "$(dirname "$0")" ; pwd)"/purencoolstudio"
   readonly REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
   readonly OUTPUT_FILENAME=$(cd "$(dirname "$0")" ; pwd)"/purencoolstudio"
   readonly TEMP_FILE=$(cd "$(dirname "$0")" ; pwd)"/purencoolstudio.tmp"
@@ -30,7 +30,7 @@ function selfUpdate() {
       mv $TEMP_FILE $OUTPUT_FILENAME
       chmod 755 $OUTPUT_FILENAME
     else
-      return 1
+      echo "wget needs to be installed for update to work"
     fi
   fi
   echo "Release notes";
