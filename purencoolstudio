@@ -13,8 +13,24 @@ echo ""
 #                    Purencool Script Tools                          #
 ######################################################################
 
-VERSION="0.09"
+VERSION="VERSION: 0.09"
 RELEASE_NOTES="Release notes"
+
+### MachineOS
+#
+###
+function machineOS(){
+    unameOut="$(uname -s)"
+    case "${unameOut}" in
+      Linux*)     machine=Linux;;
+      Darwin*)    machine=Mac;;
+      CYGWIN*)    machine=Cygwin;;
+      MINGW*)     machine=MinGw;;
+      *)          machine="UNKNOWN:${unameOut}"
+    esac
+   echo ${machine}
+}
+
 
 ### Update script
 #
@@ -43,11 +59,16 @@ function information() {
   echo "$RELEASE_NOTES"
 }
 
+
+
+
 ### install
-# Install script
+##  @command
+##  <install>
 ###
 function install() {
-  echo "I am installed"
+  OS_MACHINE=machineOS()
+  echo $OS_MACHINE;
 }
 
 ### Help
@@ -438,6 +459,10 @@ elif [ "$FUNCTION_CALL" = 'update' ]; then
 elif [ "$FUNCTION_CALL" = 'info' ]; then
 
   information
+
+elif [ "$FUNCTION_CALL" = 'install' ]; then
+
+  install
 
 else
 
