@@ -446,3 +446,7 @@ function self_update() {
     fi
   fi
 }
+
+function install(){
+  echo "I am installed"
+}
