@@ -28,11 +28,13 @@ function selfUpdate() {
     if [[ $? -eq 0 ]]; then
       mv "${TEMP_FILE}" "${OUTPUT_FILENAME}"
       chmod 755 "${OUTPUT_FILENAME}"
+      rm TEMP_FILE;
     else
       return 1
     fi
   fi
-  exit;
+  echo "Release notes";
+  echo "0.01"
 }
 
 ### install
