@@ -14,9 +14,12 @@ echo ""
 ######################################################################
 
 ### Update script
-# Updates script by running the following command "purencoolstudio self_update"
+#
+#  @command
+#  <update>
 ###
-function self_update() {
+function selfUpdate() {
+  echo "Starting self update"
   readonly REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
   readonly OUTPUT_FILENAME=$(cd "$(dirname "$0")" ; pwd)"/purencoolstudio"
   readonly TEMP_FILE="${THISDIR}/tmp.file"
@@ -29,6 +32,7 @@ function self_update() {
       return 1
     fi
   fi
+  exit;
 }
 
 ### install
@@ -424,6 +428,10 @@ elif [ "$FUNCTION_CALL" = 'ssps' ]; then
 elif [ "$FUNCTION_CALL" = 'ra' ]; then
 
   stopAndRemovePurencoolStudioPSAndSoftware
+
+elif [ "$FUNCTION_CALL" = 'update' ]; then
+
+   selfUpdate
 
 else
 
