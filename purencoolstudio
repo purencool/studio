@@ -23,10 +23,6 @@ RELEASE_NOTES="Release notes"
 ###
 function selfUpdate() {
   echo "Starting self update"
-  echo "Update will be replaced in: "$(
-    cd "$(dirname "$0")"
-    pwd
-  )"/purencoolstudio"
   REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
   OUTPUT_FILENAME=$(dirname "$0")"/purencoolstudio"
   TEMP_FILE=$(dirname "$0")"/purencoolstudio.tmp"
