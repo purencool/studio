@@ -13,7 +13,7 @@ echo ""
 #                    Purencool Script Tools                          #
 ######################################################################
 
-VERSION="0.08"
+VERSION="0.09"
 RELEASE_NOTES="Release notes"
 
 ### Update script
