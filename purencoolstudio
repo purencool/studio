@@ -28,11 +28,11 @@ function selfUpdate() {
     pwd
   )"/purencoolstudio"
   REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
-  OUTPUT_FILENAME=$(pwd)"/purencoolstudio"
-  TEMP_FILE=$(pwd)"/purencoolstudio.tmp"
+  OUTPUT_FILENAME=$(dirname "$0")"/purencoolstudio"
+  TEMP_FILE=$(dirname "$0")"/purencoolstudio.tmp"
   if [ -n "$(which wget)" ]; then
     wget -O $TEMP_FILE $REQUEST_URL
-    cp "$TEMP_FILE" "$OUTPUT_NAME"
+    mv "$TEMP_FILE" "$OUTPUT_NAME"
     rm -f "$TEMP_FILE"
     chmod 755 "$OUTPUT_FILENAME"
   fi
