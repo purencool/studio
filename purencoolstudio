@@ -28,7 +28,7 @@ function selfUpdate() {
   TEMP_FILE=$(dirname "$0")"/purencoolstudio.tmp"
   if [ -n "$(which wget)" ]; then
     wget -O $TEMP_FILE $REQUEST_URL
-    mv "$TEMP_FILE" "$OUTPUT_NAME"
+    mv "$TEMP_FILE" "$OUTPUT_FILENAME"
     rm -f "$TEMP_FILE"
     chmod 755 "$OUTPUT_FILENAME"
   fi
