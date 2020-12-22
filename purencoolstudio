@@ -26,20 +26,61 @@ WHITE='\033[0;37m'        # White
 
 
 
-VERSION="0.10"
+VERSION="0.10.1"
 RELEASE_NOTES="Release notes"
 REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
 PNC_FILENAME=$(dirname "$0")"/purencoolstudio"
 TEMP_FILE_NAME=$(dirname "$0")"/purencoolstudio.tmp"
 
-function currentVersion() {
+
+### Information
+#  @command
+#  <info>
+###
+function information() {
+  echo "VERSION: $VERSION";
+  echo "$RELEASE_NOTES"
+}
+
+
+### Current version
+#  <version>
+###
+function version() {
   THIS_VERSION=$(grep -m 1 VERSION $PNC_FILENAME)
   $(wget -O $TEMP_FILE_NAME $REQUEST_URL > /dev/null 2>&1 )
   NEW_VERSION=$(grep -m 1 VERSION $TEMP_FILE_NAME)
   rm $TEMP_FILE_NAME;
-  echo -e "The latest version$YELLOW $NEW_VERSION$NC, and your currently using$YELLOW $THIS_VERSION$NC"
+  echo -e "The latest version is$YELLOW $NEW_VERSION$NC, and your currently using$YELLOW $THIS_VERSION$NC"
 }
-currentVersion
+
+
+
+### Update script
+#
+#  @command
+#  <update>
+###
+function selfUpdate() {
+  echo "Starting self update"
+  if [ -n "$(which wget)" ]; then
+    $(wget -O $TEMP_FILE_NAME $REQUEST_URL > /dev/null 2>&1 )
+    mv "$TEMP_FILE_NAME" "$PNC_FILENAME"
+    rm -f "$TEMP_FILE_NAME"
+    chmod 755 "$PNC_FILENAME"
+  fi
+}
+
+
+
+### install
+##  @command
+##  <install>
+###
+function install() {
+  OS_MACHINE=$(machineOS)
+  echo $OS_MACHINE;
+}
 
 ### MachineOS
 #
@@ -57,41 +98,8 @@ function machineOS(){
 }
 
 
-### Update script
-#
-#  @command
-#  <update>
-###
-function selfUpdate() {
-  echo "Starting self update"
-  if [ -n "$(which wget)" ]; then
-    wget -O $TEMP_FILE_NAME $REQUEST_URL
-    mv "$TEMP_FILE_NAME" "$PNC_FILENAME"
-    rm -f "$TEMP_FILE_NAME"
-    chmod 755 "$PNC_FILENAME"
-  fi
-}
-
-### Information
-#  @command
-#  <info>
-###
-function information() {
-  echo "VERSION: $VERSION";
-  echo "$RELEASE_NOTES"
-}
 
 
-
-
-### install
-##  @command
-##  <install>
-###
-function install() {
-  OS_MACHINE=$(machineOS)
-  echo $OS_MACHINE;
-}
 
 ### Help
 # To use the Help follow the example below
@@ -486,6 +494,10 @@ elif [ "$FUNCTION_CALL" = 'install' ]; then
 
   install
 
+elif [ "$FUNCTION_CALL" = 'version' ]; then
+
+  version
+
 else
 
   helpText
@@ -521,4 +533,4 @@ echo ""
 
 # Global function tests
 #getConfig
-getConfig base_path
+#getConfig base_path
