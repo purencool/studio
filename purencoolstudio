@@ -26,7 +26,7 @@ WHITE='\033[0;37m'        # White
 
 
 
-VERSION="0.10.1"
+VERSION="0.10.2"
 RELEASE_NOTES="Release notes"
 REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
 PNC_FILENAME=$(dirname "$0")"/purencoolstudio"
@@ -80,6 +80,9 @@ function selfUpdate() {
 function install() {
   OS_MACHINE=$(machineOS)
   echo $OS_MACHINE;
+  $(wget $REQUEST_URL > /dev/null 2>&1 )
+  sudo mv  PNC_FILENAME /usr/local/bin/purencoolstudio
+  chmod 755 /usr/local/bin/purencoolstudio
 }
 
 ### MachineOS
