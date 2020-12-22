@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 FUNCTION_CALL=$1
 FIRST_ARG=$2
 SECOND_ARG=$3
@@ -13,8 +14,32 @@ echo ""
 #                    Purencool Script Tools                          #
 ######################################################################
 
-VERSION="VERSION: 0.09"
+# colors used
+NC="\033[0m"              # no color
+BLACK='\033[0;30m'        # Black
+RED='\033[0;31m'          # Red
+GREEN='\033[0;32m'        # Green
+YELLOW='\033[0;33m'       # Yellow
+BLUE='\033[0;34m'         # Blue
+WHITE='\033[0;37m'        # White
+
+
+
+
+VERSION="0.10"
 RELEASE_NOTES="Release notes"
+REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
+PNC_FILENAME=$(dirname "$0")"/purencoolstudio"
+TEMP_FILE_NAME=$(dirname "$0")"/purencoolstudio.tmp"
+
+function currentVersion() {
+  THIS_VERSION=$(grep -m 1 VERSION $PNC_FILENAME)
+  $(wget -O $TEMP_FILE_NAME $REQUEST_URL > /dev/null 2>&1 )
+  NEW_VERSION=$(grep -m 1 VERSION $TEMP_FILE_NAME)
+  rm $TEMP_FILE_NAME;
+  echo -e "The latest version$YELLOW $NEW_VERSION$NC, and your currently using$YELLOW $THIS_VERSION$NC"
+}
+currentVersion
 
 ### MachineOS
 #
@@ -39,14 +64,11 @@ function machineOS(){
 ###
 function selfUpdate() {
   echo "Starting self update"
-  REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
-  OUTPUT_FILENAME=$(dirname "$0")"/purencoolstudio"
-  TEMP_FILE=$(dirname "$0")"/purencoolstudio.tmp"
   if [ -n "$(which wget)" ]; then
-    wget -O $TEMP_FILE $REQUEST_URL
-    mv "$TEMP_FILE" "$OUTPUT_FILENAME"
-    rm -f "$TEMP_FILE"
-    chmod 755 "$OUTPUT_FILENAME"
+    wget -O $TEMP_FILE_NAME $REQUEST_URL
+    mv "$TEMP_FILE_NAME" "$PNC_FILENAME"
+    rm -f "$TEMP_FILE_NAME"
+    chmod 755 "$PNC_FILENAME"
   fi
 }
 
@@ -55,7 +77,7 @@ function selfUpdate() {
 #  <info>
 ###
 function information() {
-  echo "$VERSION";
+  echo "VERSION: $VERSION";
   echo "$RELEASE_NOTES"
 }
 
