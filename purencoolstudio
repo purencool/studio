@@ -27,7 +27,7 @@ WHITE='\033[0;37m'        # White
 
 
 VERSION="0.10.3"
-RELEASE_NOTES="First release that can work globally"
+RELEASE_NOTES="First release that can self update globally"
 REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
 PNC_FILENAME=$(dirname "$0")"/purencoolstudio"
 TEMP_FILE_NAME=$(dirname "$0")"/purencoolstudio.tmp"
@@ -83,6 +83,7 @@ function install() {
   echo $OS_MACHINE;
   sudo mv $PNC_FILENAME /usr/local/bin/purencoolstudio
   sudo chmod 755 /usr/local/bin/purencoolstudio
+  echo $(information)
 }
 
 ### MachineOS
