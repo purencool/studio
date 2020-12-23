@@ -80,9 +80,8 @@ function selfUpdate() {
 function install() {
   OS_MACHINE=$(machineOS)
   echo $OS_MACHINE;
-  $(wget $REQUEST_URL > /dev/null 2>&1 )
-  sudo mv  PNC_FILENAME /usr/local/bin/purencoolstudio
-  chmod 755 /usr/local/bin/purencoolstudio
+  sudo mv $PNC_FILENAME /usr/local/bin/purencoolstudio
+  sudo chmod 755 /usr/local/bin/purencoolstudio
 }
 
 ### MachineOS

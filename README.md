@@ -1,6 +1,7 @@
 # Purencool Studio
 
-#### Commands
+##### Installation
+https://www.purencool.digital/support/installation
 
 ##### Start ide
 
