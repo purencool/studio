@@ -26,8 +26,8 @@ WHITE='\033[0;37m'        # White
 
 
 
-VERSION="0.10.2"
-RELEASE_NOTES="Release notes"
+VERSION="0.10.3"
+RELEASE_NOTES="First release that can work globally"
 REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
 PNC_FILENAME=$(dirname "$0")"/purencoolstudio"
 TEMP_FILE_NAME=$(dirname "$0")"/purencoolstudio.tmp"
@@ -68,6 +68,7 @@ function selfUpdate() {
     mv "$TEMP_FILE_NAME" "$PNC_FILENAME"
     rm -f "$TEMP_FILE_NAME"
     chmod 755 "$PNC_FILENAME"
+    echo $(information)
   fi
 }
 
