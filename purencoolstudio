@@ -111,7 +111,7 @@ function machineOS(){
 # 2.  <purencoolstudio help <title eg, Help >> to see item
 #
 function helpText() {
-  sed -e "/### $FIRST_ARG/,/##/!d" purencoolstudio
+  sed -e "/### $FIRST_ARG/,/##/!d" $PNC_FILENAME
 }
 ##
 
