@@ -91,17 +91,6 @@ function machineOS() {
     echo ${machine}
 }
 
-### Help
-# To use the Help follow the example below
-#
-# @command
-# 1.  <purencoolstudio help> to see everything
-# 2.  <purencoolstudio help <title eg, Help >> to see item
-#
-function helpText() {
-    sed -e "/### $FIRST_ARG/,/##/!d" $PNC_FILENAME
-}
-##
 
 ######################################################################
 #                    Purencool Tools                                 #
@@ -149,9 +138,66 @@ function dockerInstalled() {
     fi
 }
 
+
+
+
 ######################################################################
 #                    Purencool User Tools                            #
 ######################################################################
+
+### Help
+# To use the Help follow the example below
+#
+# @command
+# 1.  <purencoolstudio help> to see everything
+# 2.  <purencoolstudio help <title eg, Help >> to see item
+#
+function help() {
+    VAR_ARR=$(sed -e "/### $FIRST_ARG/,/##/!d" $PNC_FILENAME)
+    echo -e "$YELLOW$VAR_ARR$NC"
+}
+##
+
+
+### install
+# Installs Purencool Studio
+#
+##
+function install() {
+    echo "Current path: "$(pwd)
+    echo "Please provide a path for data storage or use "$HOME"/purencool_studio by pressing enter: "
+    read pathToBeUsed
+
+    mkdir "${HOME}/purencool_studio"
+    mkdir "${HOME}/purencool_studio/.system"
+    mkdir "${HOME}/purencool_studio/.system/history"
+    mkdir "${HOME}/purencool_studio/.system/history/purencool_studio"
+    mkdir "${HOME}/purencool_studio/.system/history/purencool_studio_ide"
+    mkdir "${HOME}/purencool_studio/.system/purencool_studio"
+    mkdir "${HOME}/purencool_studio/.system/purencool_studio_system"
+    mkdir "${HOME}/purencool_studio/.config"
+    touch "${HOME}/purencool_studio/.config/config"
+    echo "ide_port::3001" >>${HOME}/purencool_studio/.config/config
+    echo "software_port::3000" >>${HOME}/purencool_studio/.config/config
+
+    if [ -z "$pathToBeUsed" ]; then
+        echo "base_path::"${HOME}/purencool_studio >>${HOME}/purencool_studio/.config/config
+        echo "A directory was created in: "${HOME}"/purencool_studio"
+        mkdir "${HOME}/purencool_studio/sites"
+    else
+        echo "base_path::"$pathToBeUsed >>${HOME}/purencool_studio/.config/config
+        mkdir "$pathToBeUsed"
+        mkdir "$pathToBeUsed""/sites"
+        echo "A directory was created in: $pathToBeUsed"
+    fi
+
+    docker pull purencool/purencool_studio_system:latest
+    docker pull purencool/purencool_studio:latest
+    docker pull theiaide/theia-php:latest
+    echo "Purencool Studio software has been installed"
+}
+
+
 
 ### IDEPurencoolStudioPS
 # Start IDE.
@@ -209,45 +255,7 @@ function IDEPurencoolStudioPSRemove() {
 
 }
 
-### InstallPurencoolStudioSoftware
-# Install Purencool Studio software from your computer.
-#
-# @command <sis>
-#
-##
-function installPurencoolStudioSoftware() {
-    echo "Current path: "$(pwd)
-    echo "Please provide a path for data storage or use "$HOME"/purencool_studio by pressing enter: "
-    read pathToBeUsed
 
-    mkdir "${HOME}/purencool_studio"
-    mkdir "${HOME}/purencool_studio/.system"
-    mkdir "${HOME}/purencool_studio/.system/history"
-    mkdir "${HOME}/purencool_studio/.system/history/purencool_studio"
-    mkdir "${HOME}/purencool_studio/.system/history/purencool_studio_ide"
-    mkdir "${HOME}/purencool_studio/.system/purencool_studio"
-    mkdir "${HOME}/purencool_studio/.system/purencool_studio_system"
-    mkdir "${HOME}/purencool_studio/.config"
-    touch "${HOME}/purencool_studio/.config/config"
-    echo "ide_port::3001" >>${HOME}/purencool_studio/.config/config
-    echo "software_port::3000" >>${HOME}/purencool_studio/.config/config
-
-    if [ -z "$pathToBeUsed" ]; then
-        echo "base_path::"${HOME}/purencool_studio >>${HOME}/purencool_studio/.config/config
-        echo "A directory was created in: "${HOME}"/purencool_studio"
-        mkdir "${HOME}/purencool_studio/sites"
-    else
-        echo "base_path::"$pathToBeUsed >>${HOME}/purencool_studio/.config/config
-        mkdir "$pathToBeUsed"
-        mkdir "$pathToBeUsed""/sites"
-        echo "A directory was created in: $pathToBeUsed"
-    fi
-
-    docker pull purencool/purencool_studio_system:latest
-    docker pull purencool/purencool_studio:latest
-    docker pull theiaide/theia-php:latest
-    echo "Purencool Studio software has been installed"
-}
 
 ### InstallAndStartPurencoolStudioSoftware
 # Install Purencool Studio software from your computer.
@@ -423,10 +431,12 @@ function stopAndRemovePurencoolStudioPSAndSoftware() {
 ###
 case $FUNCTION_CALL in
 getConfig) "$@" ;;
+help) "$@" ;;
+install) "$@" ;;
 listCurrentDomains) "$@" ;;
 listPortNumbers) "$@" ;;
 version) "$@" ;;
-'help') helpText ;;
+
 'di')
     dockerDi=$(dockerInstalled)
     echo "Docker is installed: "$dockerDi
@@ -509,23 +519,22 @@ echo ""
 #  The list below are functions that can be used to help manage Purencool Studio
 #  from the commandline. To use the command type <purencoolstudio help <title eg, Help >>
 #
-#  1. Help
-#  2. DockerInstalled
-#  3. IDEPurencoolStudioPS
-#  4. IDEPurencoolStudioPSRemove
-#  5. InstallPurencoolStudioSoftware <sis>
-#  6. InstallPurencoolStudioPS       <sip>
-#  7. InstallPurencoolStudioSystemPS <sisp>
-#  8. RemovePurencoolStudioPS
-#  9. RemovePurencoolStudioSystemPS  --beta
-#  10. RemovePurencoolStudioSoftware
-#  11. RemovePurencoolStudioSystemSoftware --beta
-#  12. restartPurencoolStudioPS
-#  13. RunningPurencoolStudioPS
-#  14. RunningPurencoolStudioSystemPS --beta
-#  15. StartPurencoolStudio
-#  16. StartPurencoolStudioSystem --beta
-#  17. StopPurencoolStudio
-#  18. StopPurencoolStudioSystem --beta
-#  19. StopAndRemovePurencoolStudioPSAndSoftware
+#   Help
+#   DockerInstalled
+#   IDEPurencoolStudioPS
+#   IDEPurencoolStudioPSRemove
+#   InstallPurencoolStudioPS       <sip>
+#   InstallPurencoolStudioSystemPS <sisp>
+#   RemovePurencoolStudioPS
+#   RemovePurencoolStudioSystemPS  --beta
+#   RemovePurencoolStudioSoftware
+#   RemovePurencoolStudioSystemSoftware --beta
+#   restartPurencoolStudioPS
+#   RunningPurencoolStudioPS
+#   RunningPurencoolStudioSystemPS --beta
+#   StartPurencoolStudio
+#   StartPurencoolStudioSystem --beta
+#   StopPurencoolStudio
+#   StopPurencoolStudioSystem --beta
+#   StopAndRemovePurencoolStudioPSAndSoftware
 ##
