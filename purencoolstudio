@@ -107,6 +107,15 @@ function helpText() {
 #                    Purencool Tools                                 #
 ######################################################################
 
+### listCurrentDomains()
+#  List all the domains being managed by the system.
+###
+function listCurrentDomains() {
+     VAR_BASE_PATH=$(getConfig base_path)
+     find $VAR_BASE_PATH"/sites"  -maxdepth 1 -type d
+}
+
+
 ### listPortNumbers
 #  List all the port numbers being used.
 ###
@@ -414,6 +423,7 @@ function stopAndRemovePurencoolStudioPSAndSoftware() {
 ###
 case $FUNCTION_CALL in
 getConfig) "$@" ;;
+listCurrentDomains) "$@" ;;
 listPortNumbers) "$@" ;;
 version) "$@" ;;
 'help') helpText ;;
