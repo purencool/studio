@@ -127,9 +127,7 @@ function getConfig() {
 ### DockerInstalled
 # Test to see if docker is installed
 #
-# @command <di>
-#
-##
+###
 function dockerInstalled() {
     if echo "$(docker -v)" | grep -q "version"; then
         echo "true"
@@ -145,7 +143,7 @@ function dockerInstalled() {
 #                    Purencool User Tools                            #
 ######################################################################
 
-### Help
+### help
 # To use the Help follow the example below
 #
 # @command
@@ -159,12 +157,22 @@ function help() {
 ##
 
 
-### install
+### installStudio
 # Installs Purencool Studio
 #
 ##
-function install() {
+function installStudio() {
     echo "Current path: "$(pwd)
+    dockerDi=$(dockerInstalled)
+    if [ "$dockerDi" = 'true' ]; then
+        echo "In order to run this container you'll need docker installed."
+        echo -e "$RED""Purencool Studio won't be installed until docker is installed $NC"
+        echo "  1. https://docs.docker.com/windows/started"
+        echo "  2. https://docs.docker.com/mac/started/"
+        echo "  3. https://docs.docker.com/windows/started"
+        exit;
+    fi
+
     echo "Please provide a path for data storage or use "$HOME"/purencool_studio by pressing enter: "
     read pathToBeUsed
 
@@ -430,23 +438,14 @@ function stopAndRemovePurencoolStudioPSAndSoftware() {
 # Calling functions
 ###
 case $FUNCTION_CALL in
+dockerInstalled) "$@" ;;
 getConfig) "$@" ;;
 help) "$@" ;;
 install) "$@" ;;
+installStudio) "$@" ;;
 listCurrentDomains) "$@" ;;
 listPortNumbers) "$@" ;;
 version) "$@" ;;
-
-'di')
-    dockerDi=$(dockerInstalled)
-    echo "Docker is installed: "$dockerDi
-    if [ "$dockerDi" = 'false' ]; then
-        echo "In order to run this container you'll need docker installed."
-        echo "  1. https://docs.docker.com/windows/started"
-        echo "  2. https://docs.docker.com/mac/started/"
-        echo "  3. https://docs.docker.com/windows/started"
-    fi
-    ;;
 'ide')
     IDEPurencoolStudioPS $FIRST_ARG $SECOND_ARG $THIRD_ARG $FOURTH_ARG
     ;;
@@ -507,9 +506,6 @@ version) "$@" ;;
 'info')
     information
     ;;
-'install')
-    install
-    ;;
 esac
 
 # Makes a cleaner looking result in the terminal
@@ -519,8 +515,9 @@ echo ""
 #  The list below are functions that can be used to help manage Purencool Studio
 #  from the commandline. To use the command type <purencoolstudio help <title eg, Help >>
 #
-#   Help
-#   DockerInstalled
+#   help
+#   installStudio
+#
 #   IDEPurencoolStudioPS
 #   IDEPurencoolStudioPSRemove
 #   InstallPurencoolStudioPS       <sip>
