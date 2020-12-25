@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 FUNCTION_CALL=$1
 FIRST_ARG=$2
 SECOND_ARG=$3
@@ -15,46 +14,39 @@ echo ""
 ######################################################################
 
 # colors used
-NC="\033[0m"              # no color
-BLACK='\033[0;30m'        # Black
-RED='\033[0;31m'          # Red
-GREEN='\033[0;32m'        # Green
-YELLOW='\033[0;33m'       # Yellow
-BLUE='\033[0;34m'         # Blue
-WHITE='\033[0;37m'        # White
+NC="\033[0m"        # no color
+BLACK='\033[0;30m'  # Black
+RED='\033[0;31m'    # Red
+GREEN='\033[0;32m'  # Green
+YELLOW='\033[0;33m' # Yellow
+BLUE='\033[0;34m'   # Blue
+WHITE='\033[0;37m'  # White
 
-
-
-
-VERSION="0.10.3"
-RELEASE_NOTES="First release that can self update globally"
+VERSION="0.10.4"
+RELEASE_NOTES="Added PS starting functionality"
 REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
 PNC_FILENAME=$(dirname "$0")"/purencoolstudio"
 TEMP_FILE_NAME=$(dirname "$0")"/purencoolstudio.tmp"
-
 
 ### Information
 #  @command
 #  <info>
 ###
 function information() {
-  echo "VERSION: $VERSION";
-  echo "$RELEASE_NOTES"
+    echo "VERSION: $VERSION"
+    echo "$RELEASE_NOTES"
 }
-
 
 ### Current version
 #  <version>
 ###
 function version() {
-  THIS_VERSION=$(grep -m 1 VERSION $PNC_FILENAME)
-  $(wget -O $TEMP_FILE_NAME $REQUEST_URL > /dev/null 2>&1 )
-  NEW_VERSION=$(grep -m 1 VERSION $TEMP_FILE_NAME)
-  rm $TEMP_FILE_NAME;
-  echo -e "The latest version is$YELLOW $NEW_VERSION$NC, and your currently using$YELLOW $THIS_VERSION$NC"
+    THIS_VERSION=$(grep -m 1 VERSION $PNC_FILENAME)
+    $(wget -O $TEMP_FILE_NAME $REQUEST_URL >/dev/null 2>&1)
+    NEW_VERSION=$(grep -m 1 VERSION $TEMP_FILE_NAME)
+    rm $TEMP_FILE_NAME
+    echo -e "The latest version is$YELLOW $NEW_VERSION$NC, and your currently using$YELLOW $THIS_VERSION$NC"
 }
-
-
 
 ### Update script
 #
@@ -62,48 +54,42 @@ function version() {
 #  <update>
 ###
 function selfUpdate() {
-  echo "Starting self update"
-  if [ -n "$(which wget)" ]; then
-    $(wget -O $TEMP_FILE_NAME $REQUEST_URL > /dev/null 2>&1 )
-    mv "$TEMP_FILE_NAME" "$PNC_FILENAME"
-    rm -f "$TEMP_FILE_NAME"
-    chmod 755 "$PNC_FILENAME"
-    echo $(information)
-  fi
+    echo "Starting self update"
+    if [ -n "$(which wget)" ]; then
+        $(wget -O $TEMP_FILE_NAME $REQUEST_URL >/dev/null 2>&1)
+        mv "$TEMP_FILE_NAME" "$PNC_FILENAME"
+        rm -f "$TEMP_FILE_NAME"
+        chmod 755 "$PNC_FILENAME"
+        echo $(information)
+    fi
 }
-
-
 
 ### install
 ##  @command
 ##  <install>
 ###
 function install() {
-  OS_MACHINE=$(machineOS)
-  echo $OS_MACHINE;
-  sudo mv $PNC_FILENAME /usr/local/bin/purencoolstudio
-  sudo chmod 755 /usr/local/bin/purencoolstudio
-  echo $(information)
+    OS_MACHINE=$(machineOS)
+    echo $OS_MACHINE
+    sudo mv $PNC_FILENAME /usr/local/bin/purencoolstudio
+    sudo chmod 755 /usr/local/bin/purencoolstudio
+    echo $(information)
 }
 
 ### MachineOS
 #
 ###
-function machineOS(){
+function machineOS() {
     unameOut="$(uname -s)"
     case "${unameOut}" in
-      Linux*)     machine=Linux;;
-      Darwin*)    machine=Mac;;
-      CYGWIN*)    machine=Cygwin;;
-      MINGW*)     machine=MinGw;;
-      *)          machine="UNKNOWN:${unameOut}"
+    Linux*) machine=Linux ;;
+    Darwin*) machine=Mac ;;
+    CYGWIN*) machine=Cygwin ;;
+    MINGW*) machine=MinGw ;;
+    *) machine="UNKNOWN:${unameOut}" ;;
     esac
-   echo ${machine}
+    echo ${machine}
 }
-
-
-
-
 
 ### Help
 # To use the Help follow the example below
@@ -113,7 +99,7 @@ function machineOS(){
 # 2.  <purencoolstudio help <title eg, Help >> to see item
 #
 function helpText() {
-  sed -e "/### $FIRST_ARG/,/##/!d" $PNC_FILENAME
+    sed -e "/### $FIRST_ARG/,/##/!d" $PNC_FILENAME
 }
 ##
 
@@ -121,16 +107,23 @@ function helpText() {
 #                    Purencool Tools                                 #
 ######################################################################
 
+### listPortNumbers
+#  List all the port numbers being used.
+###
+function listPortNumbers() {
+    docker ps --format '{{.Ports}}' | sed 's/^0.0.0.0://' | cut -c1-4
+}
+
 ### GetConfig
 # Gets Purencool Studios Global config
 ###
 function getConfig() {
-  local configRequestStr="$1"
-  [[ -z $configRequestStr ]] && {
-    echo "${FUNCNAME}(): config request variable not specified"
-    exit 1
-  }
-  sed -e 's#.*::\(\)#\1#' <<<"$(grep "^$configRequestStr" ${HOME}/purencool_studio/.config/config)"
+    local configRequestStr="$1"
+    [[ -z $configRequestStr ]] && {
+        echo "${FUNCNAME}(): config request variable not specified"
+        exit 1
+    }
+    sed -e 's#.*::\(\)#\1#' <<<"$(grep "^$configRequestStr" ${HOME}/purencool_studio/.config/config)"
 }
 
 ### DockerInstalled
@@ -140,12 +133,16 @@ function getConfig() {
 #
 ##
 function dockerInstalled() {
-  if echo "$(docker -v)" | grep -q "version"; then
-    echo "true"
-  else
-    echo "false"
-  fi
+    if echo "$(docker -v)" | grep -q "version"; then
+        echo "true"
+    else
+        echo "false"
+    fi
 }
+
+######################################################################
+#                    Purencool User Tools                            #
+######################################################################
 
 ### IDEPurencoolStudioPS
 # Start IDE.
@@ -155,34 +152,34 @@ function dockerInstalled() {
 ##
 function IDEPurencoolStudioPS() {
 
-  if [ -z "$1" ]; then
-    VAR_BASE_PATH=$(getConfig base_path)
-  else
-    VAR_BASE_PATH=$1
-  fi
+    if [ -z "$1" ]; then
+        VAR_BASE_PATH=$(getConfig base_path)
+    else
+        VAR_BASE_PATH=$1
+    fi
 
-  if [ -z "$2" ]; then
-    VAR_IDE_PORT=$(getConfig ide_port)
-  else
-    VAR_IDE_PORT=$2
-  fi
+    if [ -z "$2" ]; then
+        VAR_IDE_PORT=$(getConfig ide_port)
+    else
+        VAR_IDE_PORT=$2
+    fi
 
-  if [ -z "$3" ]; then
-    VAR_IDE_NAME="purencool_studio_ide_"$((RANDOM % 40))
-  else
-    VAR_IDE_NAME=$3
-  fi
+    if [ -z "$3" ]; then
+        VAR_IDE_NAME="purencool_studio_ide_"$((RANDOM % 40))
+    else
+        VAR_IDE_NAME=$3
+    fi
 
-  if [ -z "$4" ]; then
-    VAR_IDE_TYPE="theiaide/theia-php:latest"
-  else
-    VAR_IDE_TYPE=$4
-  fi
+    if [ -z "$4" ]; then
+        VAR_IDE_TYPE="theiaide/theia-php:next"
+    else
+        VAR_IDE_TYPE=$4
+    fi
 
-  #echo $VAR_IDE_PORT:3000  --name=$VAR_IDE_NAME -v "$VAR_BASE_PATH:/home/project:cached" $VAR_IDE_TYPE
-  docker run -it -d -p $VAR_IDE_PORT:3000 --name=$VAR_IDE_NAME -v "$VAR_BASE_PATH:/home/project:cached" $VAR_IDE_TYPE
+    # docker run -it -d -p  5000:3000  --name=my_name -v "a_path:/home/project:cached theiaide/theia-php:latest"
+    docker run -it -d -p $VAR_IDE_PORT:3000 --name=$VAR_IDE_NAME -v "$VAR_BASE_PATH:/home/project:cached" $VAR_IDE_TYPE
 
-  echo "http://localhost:$VAR_IDE_PORT"
+    echo "http://localhost:$VAR_IDE_PORT"
 }
 
 ### IDEPurencoolStudioPSRemove
@@ -193,13 +190,13 @@ function IDEPurencoolStudioPS() {
 ##
 function IDEPurencoolStudioPSRemove() {
 
-  if [ -z "$1" ]; then
-    docker stop $1
-    docker rm $1
-  else
-    docker stop $(docker ps -a -q)
-    docker rm $(docker ps -a -q)
-  fi
+    if [ -z "$1" ]; then
+        docker stop $1
+        docker rm $1
+    else
+        docker stop $(docker ps -a -q)
+        docker rm $(docker ps -a -q)
+    fi
 
 }
 
@@ -210,37 +207,37 @@ function IDEPurencoolStudioPSRemove() {
 #
 ##
 function installPurencoolStudioSoftware() {
-  echo "Current path: "$(pwd)
-  echo "Please provide a path for data storage or use "$HOME"/purencool_studio by pressing enter: "
-  read pathToBeUsed
+    echo "Current path: "$(pwd)
+    echo "Please provide a path for data storage or use "$HOME"/purencool_studio by pressing enter: "
+    read pathToBeUsed
 
-  mkdir "${HOME}/purencool_studio"
-  mkdir "${HOME}/purencool_studio/.system"
-  mkdir "${HOME}/purencool_studio/.system/history"
-  mkdir "${HOME}/purencool_studio/.system/history/purencool_studio"
-  mkdir "${HOME}/purencool_studio/.system/history/purencool_studio_ide"
-  mkdir "${HOME}/purencool_studio/.system/purencool_studio"
-  mkdir "${HOME}/purencool_studio/.system/purencool_studio_system"
-  mkdir "${HOME}/purencool_studio/.config"
-  touch "${HOME}/purencool_studio/.config/config"
-  echo "ide_port::3001" >>${HOME}/purencool_studio/.config/config
-  echo "software_port::3000" >>${HOME}/purencool_studio/.config/config
+    mkdir "${HOME}/purencool_studio"
+    mkdir "${HOME}/purencool_studio/.system"
+    mkdir "${HOME}/purencool_studio/.system/history"
+    mkdir "${HOME}/purencool_studio/.system/history/purencool_studio"
+    mkdir "${HOME}/purencool_studio/.system/history/purencool_studio_ide"
+    mkdir "${HOME}/purencool_studio/.system/purencool_studio"
+    mkdir "${HOME}/purencool_studio/.system/purencool_studio_system"
+    mkdir "${HOME}/purencool_studio/.config"
+    touch "${HOME}/purencool_studio/.config/config"
+    echo "ide_port::3001" >>${HOME}/purencool_studio/.config/config
+    echo "software_port::3000" >>${HOME}/purencool_studio/.config/config
 
-  if [ -z "$pathToBeUsed" ]; then
-    echo "base_path::"${HOME}/purencool_studio >>${HOME}/purencool_studio/.config/config
-    echo "A directory was created in: "${HOME}"/purencool_studio"
-    mkdir "${HOME}/purencool_studio/sites"
-  else
-    echo "base_path::"$pathToBeUsed >>${HOME}/purencool_studio/.config/config
-    mkdir "$pathToBeUsed"
-    mkdir "$pathToBeUsed""/sites"
-    echo "A directory was created in: $pathToBeUsed"
-  fi
+    if [ -z "$pathToBeUsed" ]; then
+        echo "base_path::"${HOME}/purencool_studio >>${HOME}/purencool_studio/.config/config
+        echo "A directory was created in: "${HOME}"/purencool_studio"
+        mkdir "${HOME}/purencool_studio/sites"
+    else
+        echo "base_path::"$pathToBeUsed >>${HOME}/purencool_studio/.config/config
+        mkdir "$pathToBeUsed"
+        mkdir "$pathToBeUsed""/sites"
+        echo "A directory was created in: $pathToBeUsed"
+    fi
 
-  docker pull purencool/purencool_studio_system:latest
-  docker pull purencool/purencool_studio:latest
-  docker pull theiaide/theia-php:latest
-  echo "Purencool Studio software has been installed"
+    docker pull purencool/purencool_studio_system:latest
+    docker pull purencool/purencool_studio:latest
+    docker pull theiaide/theia-php:latest
+    echo "Purencool Studio software has been installed"
 }
 
 ### InstallAndStartPurencoolStudioSoftware
@@ -250,8 +247,8 @@ function installPurencoolStudioSoftware() {
 #
 ##
 function installPurencoolStudioSoftwareAndPS() {
-  installPurencoolStudioSoftware
-  installPurencoolStudioPS
+    installPurencoolStudioSoftware
+    installPurencoolStudioPS
 }
 
 ### InstallPurencoolStudioPS
@@ -261,9 +258,8 @@ function installPurencoolStudioSoftwareAndPS() {
 #
 ##
 function installPurencoolStudioPS() {
-  VAR_PURENCOOL_STUDIO_PORT=$(getConfig purencool_studio_port)
-  docker run --name=purencool_studio -d -p $VAR_PURENCOOL_STUDIO_PORT:3000 -t purencool/purencool_studio:latest
-  echo "Purencool Studio PS is now installed and running"
+    VAR_PURENCOOL_STUDIO_PORT=$(getConfig purencool_studio_port)
+    docker run --name=purencool_studio -d -p $VAR_PURENCOOL_STUDIO_PORT:3000 -t purencool/purencool_studio:latest
 }
 
 ### InstallPurencoolStudioSystemPS
@@ -273,10 +269,10 @@ function installPurencoolStudioPS() {
 #
 ##
 function installPurencoolStudioSystemPS() {
-  getConfig base_path
+    getConfig base_path
 
-  #docker run --mount type=bind,source="$(pwd)"/test,target=/user/src/app/mntdir --name=purencool_studio_system -d  -t purencool_studio_system:latest
-  #echo "Purencool Studio PS is now installed and running"
+    #docker run --mount type=bind,source="$(pwd)"/test,target=/user/src/app/mntdir --name=purencool_studio_system -d  -t purencool_studio_system:latest
+    #echo "Purencool Studio PS is now installed and running"
 }
 
 ### RemovePurencoolStudioSoftware
@@ -286,8 +282,7 @@ function installPurencoolStudioSystemPS() {
 #
 ##
 function removePurencoolStudioSoftware() {
-  docker rmi -f purencool/purencool_studio
-  echo "Purencool Studio software has been removed or does not exist"
+    docker rmi -f purencool/purencool_studio
 }
 
 ### RemovePurencoolStudioPS
@@ -297,7 +292,7 @@ function removePurencoolStudioSoftware() {
 #
 ##
 function removePurencoolStudioPS() {
-  echo $(docker rm purencool_studio)" has been removed"
+    echo $(docker rm purencool_studio)" has been removed"
 }
 
 ### RemovePurencoolStudioSystemSoftware
@@ -307,8 +302,8 @@ function removePurencoolStudioPS() {
 #
 ##
 function removePurencoolStudioSystemSoftware() {
-  docker rmi -f purencool/purencool_studio_system
-  echo "Purencool Studio System software has been removed or does not exist"
+    docker rmi -f purencool/purencool_studio_system
+    echo "Purencool Studio System software has been removed or does not exist"
 }
 
 ### RemovePurencoolStudioSystemPS
@@ -318,7 +313,22 @@ function removePurencoolStudioSystemSoftware() {
 #
 ##
 function removePurencoolStudioSystemPS() {
-  echo $(docker rm purencool_studio_system)" has been removed"
+    echo $(docker rm purencool_studio_system)" has been removed"
+}
+
+### restartPurencoolStudioPS
+# Find or start PS .
+#
+# @command <rssp>
+#
+##
+function restartPurencoolStudioPS() {
+    if [ -z "$1" ]; then
+        docker ps -a
+    else
+        docker start $1
+        docker ps
+    fi
 }
 
 ### RunningPurencoolStudioPS
@@ -328,7 +338,7 @@ function removePurencoolStudioSystemPS() {
 #
 ##
 function runningPurencoolStudioPS() {
-  docker ps -f name=purencool_studio | grep -w purencool_studio
+    docker ps -f name=purencool_studio | grep -w purencool_studio
 }
 
 ### RunningPurencoolStudioSystemPS
@@ -338,7 +348,7 @@ function runningPurencoolStudioPS() {
 #
 ##
 function runningPurencoolStudioSystemPS() {
-  docker ps -f name=purencool_studio_system | grep -w purencool_studio_system
+    docker ps -f name=purencool_studio_system | grep -w purencool_studio_system
 }
 
 ### StartPurencoolStudio
@@ -348,8 +358,8 @@ function runningPurencoolStudioSystemPS() {
 #
 ##
 function startPurencoolStudio() {
-  echo $(docker start purencool_studio)" has been started"
-  docker ps -f name=purencool_studio | grep -w purencool_studio
+    echo $(docker start purencool_studio)" has been started"
+    docker ps -f name=purencool_studio | grep -w purencool_studio
 }
 
 ### StartPurencoolStudioSystem
@@ -359,8 +369,8 @@ function startPurencoolStudio() {
 #
 ##
 function startPurencoolStudioSystem() {
-  echo $(docker start purencool_studio_system)" has been started"
-  docker ps -f name=purencool_studio_system | grep -w purencool_studio_system
+    echo $(docker start purencool_studio_system)" has been started"
+    docker ps -f name=purencool_studio_system | grep -w purencool_studio_system
 }
 
 ### StopPurencoolStudio
@@ -370,7 +380,7 @@ function startPurencoolStudioSystem() {
 #
 ##
 function stopPurencoolStudio() {
-  echo $(docker stop purencool_studio)" has been stopped"
+    echo $(docker stop purencool_studio)" has been stopped"
 }
 
 ### StopPurencoolStudioSystem
@@ -380,7 +390,7 @@ function stopPurencoolStudio() {
 #
 ##
 function stopPurencoolStudioSystem() {
-  echo $(docker stop purencool_studio_system)" has been stopped"
+    echo $(docker stop purencool_studio_system)" has been stopped"
 }
 
 ### StopAndRemovePurencoolStudioPSAndSoftware
@@ -390,123 +400,97 @@ function stopPurencoolStudioSystem() {
 #
 ##
 function stopAndRemovePurencoolStudioPSAndSoftware() {
-  stopPurencoolStudio
-  removePurencoolStudioPS
-  removePurencoolStudioSoftware
-  stopPurencoolStudioSystem
-  removePurencoolStudioSystemPS
-  removePurencoolStudioSystemSoftware
+    stopPurencoolStudio
+    removePurencoolStudioPS
+    removePurencoolStudioSoftware
+    stopPurencoolStudioSystem
+    removePurencoolStudioSystemPS
+    removePurencoolStudioSystemSoftware
 
 }
 
-if [ "$FUNCTION_CALL" = 'help' ]; then
-
-  helpText
-
-elif [ "$FUNCTION_CALL" = 'di' ]; then
-
-  dockerDi=$(dockerInstalled)
-  echo "Docker is installed: "$dockerDi
-  if [ "$dockerDi" = 'false' ]; then
-    echo "In order to run this container you'll need docker installed."
-    echo "  1. https://docs.docker.com/windows/started"
-    echo "  2. https://docs.docker.com/mac/started/"
-    echo "  3. https://docs.docker.com/windows/started"
-  fi
-
-elif [ "$FUNCTION_CALL" = 'ide' ]; then
-
-  IDEPurencoolStudioPS $FIRST_ARG $SECOND_ARG $THIRD_ARG $FOURTH_ARG
-
-elif [ "$FUNCTION_CALL" = 'ider' ]; then
-
-  IDEPurencoolStudioPSRemove $FIRST_ARG
-
-elif [ "$FUNCTION_CALL" = 'sis' ]; then
-
-  installPurencoolStudioSoftware
-
-elif [ "$FUNCTION_CALL" = 'sip' ]; then
-
-  installPurencoolStudioPS
-
-elif [ "$FUNCTION_CALL" = 'sisp' ]; then
-
-  installPurencoolStudioSystemPS
-
-elif [ "$FUNCTION_CALL" = 'sisap' ]; then
-
-  installPurencoolStudioSoftwareAndPS
-
-elif [ "$FUNCTION_CALL" = 'srp' ]; then
-
-  removePurencoolStudioPS
-
-elif [ "$FUNCTION_CALL" = 'srsp' ]; then
-
-  removePurencoolStudioSystemPS
-
-elif
-  [ "$FUNCTION_CALL" = 'srs' ]
-then
-
-  removePurencoolStudioSoftware
-
-elif [ "$FUNCTION_CALL" = 'srss' ]; then
-
-  removePurencoolStudioSystemSoftware
-
-elif
-  [ "$FUNCTION_CALL" = 'rps' ]
-then
-
-  runningPurencoolStudioPS
-
-elif [ "$FUNCTION_CALL" = 'rpss' ]; then
-
-  runningPurencoolStudioSystemPS
-
-elif [ "$FUNCTION_CALL" = 'sst' ]; then
-
-  startPurencoolStudio
-
-elif [ "$FUNCTION_CALL" = 'ssts' ]; then
-
-  startPurencoolStudioSystem
-
-elif [ "$FUNCTION_CALL" = 'ssp' ]; then
-
-  stopPurencoolStudio
-
-elif [ "$FUNCTION_CALL" = 'ssps' ]; then
-
-  stopPurencoolStudioSystem
-
-elif [ "$FUNCTION_CALL" = 'ra' ]; then
-
-  stopAndRemovePurencoolStudioPSAndSoftware
-
-elif [ "$FUNCTION_CALL" = 'update' ]; then
-
-  selfUpdate
-
-elif [ "$FUNCTION_CALL" = 'info' ]; then
-
-  information
-
-elif [ "$FUNCTION_CALL" = 'install' ]; then
-
-  install
-
-elif [ "$FUNCTION_CALL" = 'version' ]; then
-
-  version
-
-else
-
-  helpText
-
-fi
+###
+# Calling functions
+###
+case $FUNCTION_CALL in
+getConfig) "$@" ;;
+listPortNumbers) "$@" ;;
+version) "$@" ;;
+'help') helpText ;;
+'di')
+    dockerDi=$(dockerInstalled)
+    echo "Docker is installed: "$dockerDi
+    if [ "$dockerDi" = 'false' ]; then
+        echo "In order to run this container you'll need docker installed."
+        echo "  1. https://docs.docker.com/windows/started"
+        echo "  2. https://docs.docker.com/mac/started/"
+        echo "  3. https://docs.docker.com/windows/started"
+    fi
+    ;;
+'ide')
+    IDEPurencoolStudioPS $FIRST_ARG $SECOND_ARG $THIRD_ARG $FOURTH_ARG
+    ;;
+'ider')
+    IDEPurencoolStudioPSRemove $FIRST_ARG
+    ;;
+'sis')
+    installPurencoolStudioSoftware
+    ;;
+'sis')
+    installPurencoolStudioPS
+    ;;
+'sisp')
+    installPurencoolStudioSystemPS
+    ;;
+'sisap')
+    installPurencoolStudioSoftwareAndPS
+    ;;
+'srp')
+    removePurencoolStudioPS
+    ;;
+'srsp')
+    removePurencoolStudioSystemPS
+    ;;
+'srs')
+    removePurencoolStudioSoftware
+    ;;
+'srss')
+    removePurencoolStudioSystemSoftware
+    ;;
+'rssp')
+    restartPurencoolStudioPS $FIRST_ARG
+    ;;
+'rps')
+    runningPurencoolStudioPS
+    ;;
+'rpss')
+    runningPurencoolStudioSystemPS
+    ;;
+'sst')
+    startPurencoolStudio
+    ;;
+'ssts')
+    startPurencoolStudioSystem
+    ;;
+'ssp')
+    stopPurencoolStudio
+    ;;
+'ssps')
+    stopPurencoolStudioSystem
+    ;;
+'ra')
+    stopAndRemovePurencoolStudioPSAndSoftware
+    ;;
+'update')
+    selfUpdate
+    ;;
+'info')
+    information
+    ;;
+'install')
+    install
+    ;;
+esac
 
 # Makes a cleaner looking result in the terminal
 echo ""
@@ -526,15 +510,12 @@ echo ""
 #  9. RemovePurencoolStudioSystemPS  --beta
 #  10. RemovePurencoolStudioSoftware
 #  11. RemovePurencoolStudioSystemSoftware --beta
-#  12. RunningPurencoolStudioPS
-#  13. RunningPurencoolStudioSystemPS --beta
-#  14. StartPurencoolStudio
-#  15. StartPurencoolStudioSystem --beta
-#  16. StopPurencoolStudio
-#  17. StopPurencoolStudioSystem --beta
-#  18. StopAndRemovePurencoolStudioPSAndSoftware
+#  12. restartPurencoolStudioPS
+#  13. RunningPurencoolStudioPS
+#  14. RunningPurencoolStudioSystemPS --beta
+#  15. StartPurencoolStudio
+#  16. StartPurencoolStudioSystem --beta
+#  17. StopPurencoolStudio
+#  18. StopPurencoolStudioSystem --beta
+#  19. StopAndRemovePurencoolStudioPSAndSoftware
 ##
-
-# Global function tests
-#getConfig
-#getConfig base_path
