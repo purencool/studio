@@ -1,10 +1,10 @@
 #!/bin/bash
 
 FUNCTION_CALL=$1
-FIRST_ARG=$2
-SECOND_ARG=$3
-THIRD_ARG=$4
-FOURTH_ARG=$5
+ARG1=$2
+ARG2=$3
+ARG3=$4
+ARG4=$5
 
 # Makes a cleaner looking result in the terminal
 echo ""
@@ -28,45 +28,22 @@ REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolst
 PNC_FILENAME=$(dirname "$0")"/purencoolstudio"
 TEMP_FILE_NAME=$(dirname "$0")"/purencoolstudio.tmp"
 
-### Information
-#  @command
-#  <info>
+
+STUDIO_UI="purencool/purencool_studio_system:latest"
+STUDIO_SYSTEM="purencool/purencool_studio:latest"
+BASE_IDE="theiaide/theia-php:latest"
+
+### information
+#
 ###
 function information() {
     echo "VERSION: $VERSION"
     echo "$RELEASE_NOTES"
 }
 
-### Current version
-#  <version>
-###
-function version() {
-    THIS_VERSION=$(grep -m 1 VERSION $PNC_FILENAME)
-    $(wget -O $TEMP_FILE_NAME $REQUEST_URL >/dev/null 2>&1)
-    NEW_VERSION=$(grep -m 1 VERSION $TEMP_FILE_NAME)
-    rm $TEMP_FILE_NAME
-    echo -e "The latest version is$YELLOW $NEW_VERSION$NC, and your currently using$YELLOW $THIS_VERSION$NC"
-}
-
-### Update script
-#
-#  @command
-#  <update>
-###
-function selfUpdate() {
-    echo "Starting self update"
-    if [ -n "$(which wget)" ]; then
-        $(wget -O $TEMP_FILE_NAME $REQUEST_URL >/dev/null 2>&1)
-        mv "$TEMP_FILE_NAME" "$PNC_FILENAME"
-        rm -f "$TEMP_FILE_NAME"
-        chmod 755 "$PNC_FILENAME"
-        echo $(information)
-    fi
-}
 
 ### install
-##  @command
-##  <install>
+# Automates the installation of Studio
 ###
 function install() {
     OS_MACHINE=$(machineOS)
@@ -91,6 +68,33 @@ function machineOS() {
     echo ${machine}
 }
 
+### Update
+# Self updates the Studio global script
+##
+function update() {
+    echo "Starting self update"
+    if [ -n "$(which wget)" ]; then
+        $(wget -O $TEMP_FILE_NAME $REQUEST_URL >/dev/null 2>&1)
+        mv "$TEMP_FILE_NAME" "$PNC_FILENAME"
+        rm -f "$TEMP_FILE_NAME"
+        chmod 755 "$PNC_FILENAME"
+        echo $(information)
+    fi
+}
+
+### Version
+# Testing to see if there is a newer Studio version
+###
+function version() {
+    THIS_VERSION=$(grep -m 1 VERSION $PNC_FILENAME)
+    $(wget -O $TEMP_FILE_NAME $REQUEST_URL >/dev/null 2>&1)
+    NEW_VERSION=$(grep -m 1 VERSION $TEMP_FILE_NAME)
+    rm $TEMP_FILE_NAME
+    echo -e "The latest version is$YELLOW $NEW_VERSION$NC, and your currently using$YELLOW $THIS_VERSION$NC"
+}
+
+
+
 
 ######################################################################
 #                    Purencool Tools                                 #
@@ -100,8 +104,8 @@ function machineOS() {
 #  List all the domains being managed by the system.
 ###
 function listCurrentDomains() {
-     VAR_BASE_PATH=$(getConfig base_path)
-     find $VAR_BASE_PATH"/sites"  -maxdepth 1 -type d
+   VAR_BASE_PATH=$(getConfig base_path)
+   find $VAR_BASE_PATH"/sites"  -maxdepth 1 -type d
 }
 
 
@@ -186,7 +190,8 @@ function installStudio() {
     mkdir "${HOME}/purencool_studio/.config"
     touch "${HOME}/purencool_studio/.config/config"
     echo "ide_port::3001" >>${HOME}/purencool_studio/.config/config
-    echo "software_port::3000" >>${HOME}/purencool_studio/.config/config
+    echo "studio_port::7000" >>${HOME}/purencool_studio/.config/config
+    echo "system_port::7001" >>${HOME}/purencool_studio/.config/config
 
     if [ -z "$pathToBeUsed" ]; then
         echo "base_path::"${HOME}/purencool_studio >>${HOME}/purencool_studio/.config/config
@@ -199,21 +204,31 @@ function installStudio() {
         echo "A directory was created in: $pathToBeUsed"
     fi
 
-    docker pull purencool/purencool_studio_system:latest
-    docker pull purencool/purencool_studio:latest
-    docker pull theiaide/theia-php:latest
+    docker pull $STUDIO_UI
+    docker pull $STUDIO_SYSTEM
+    docker pull $BASE_IDE
     echo "Purencool Studio software has been installed"
+}
+
+### uninstallStudio
+# Uninstalls Purencool Studio except the sites directory
+#
+##
+function uninstallStudio() {
+    rm -Rf "${HOME}/purencool_studio/.system"
+    rn -Rf "${HOME}/purencool_studio/.config"
+    $(removeStudio)
 }
 
 
 
-### IDEPurencoolStudioPS
-# Start IDE.
+### ide
+# Creat a new IDE.
 #
 # @command <ide>
 #
 ##
-function IDEPurencoolStudioPS() {
+function ide() {
 
     if [ -z "$1" ]; then
         VAR_BASE_PATH=$(getConfig base_path)
@@ -234,24 +249,22 @@ function IDEPurencoolStudioPS() {
     fi
 
     if [ -z "$4" ]; then
-        VAR_IDE_TYPE="theiaide/theia-php:next"
+        VAR_IDE_TYPE="theiaide/theia-php:latest"
     else
         VAR_IDE_TYPE=$4
     fi
 
-    # docker run -it -d -p  5000:3000  --name=my_name -v "a_path:/home/project:cached theiaide/theia-php:latest"
     docker run -it -d -p $VAR_IDE_PORT:3000 --name=$VAR_IDE_NAME -v "$VAR_BASE_PATH:/home/project:cached" $VAR_IDE_TYPE
-
     echo "http://localhost:$VAR_IDE_PORT"
 }
 
-### IDEPurencoolStudioPSRemove
+### removeIde
 # Remove  IDE.
 #
-# @command <ider>
+# @command <removeIde>
 #
 ##
-function IDEPurencoolStudioPSRemove() {
+function removeIde() {
 
     if [ -z "$1" ]; then
         docker stop $1
@@ -264,175 +277,61 @@ function IDEPurencoolStudioPSRemove() {
 }
 
 
-
-### InstallAndStartPurencoolStudioSoftware
-# Install Purencool Studio software from your computer.
+### runStudio
+# Run the Studio images.
 #
-# @command <sisap>
-#
-##
-function installPurencoolStudioSoftwareAndPS() {
-    installPurencoolStudioSoftware
-    installPurencoolStudioPS
-}
-
-### InstallPurencoolStudioPS
-# Install Purencool Studio PS.
-#
-# @command <sip>
+# @command <runStudio>
 #
 ##
-function installPurencoolStudioPS() {
-    VAR_PURENCOOL_STUDIO_PORT=$(getConfig purencool_studio_port)
-    docker run --name=purencool_studio -d -p $VAR_PURENCOOL_STUDIO_PORT:3000 -t purencool/purencool_studio:latest
-}
-
-### InstallPurencoolStudioSystemPS
-# Install Purencool Studio System PS.
-#
-# @command <sisp>
-#
-##
-function installPurencoolStudioSystemPS() {
-    getConfig base_path
-
-    #docker run --mount type=bind,source="$(pwd)"/test,target=/user/src/app/mntdir --name=purencool_studio_system -d  -t purencool_studio_system:latest
-    #echo "Purencool Studio PS is now installed and running"
-}
-
-### RemovePurencoolStudioSoftware
-# Removes Purencool Studio software from your computer.
-#
-# @command <srs>
-#
-##
-function removePurencoolStudioSoftware() {
-    docker rmi -f purencool/purencool_studio
-}
-
-### RemovePurencoolStudioPS
-# Remove the studio docker process
-#
-# @command <srp>
-#
-##
-function removePurencoolStudioPS() {
-    echo $(docker rm purencool_studio)" has been removed"
-}
-
-### RemovePurencoolStudioSystemSoftware
-# Removes Purencool Studio System software from your computer.
-#
-# @command <srss>
-#
-##
-function removePurencoolStudioSystemSoftware() {
-    docker rmi -f purencool/purencool_studio_system
-    echo "Purencool Studio System software has been removed or does not exist"
-}
-
-### RemovePurencoolStudioSystemPS
-# Remove the studio system docker process
-#
-# @command <srsp>
-#
-##
-function removePurencoolStudioSystemPS() {
-    echo $(docker rm purencool_studio_system)" has been removed"
-}
-
-### restartPurencoolStudioPS
-# Find or start PS .
-#
-# @command <rssp>
-#
-##
-function restartPurencoolStudioPS() {
-    if [ -z "$1" ]; then
-        docker ps -a
-    else
-        docker start $1
-        docker ps
-    fi
-}
-
-### RunningPurencoolStudioPS
-# Remove the studio docker process
-#
-# @command <rps>
-#
-##
-function runningPurencoolStudioPS() {
+function runStudio(){
+    VAR_STUDIO_PORT=$(getConfig studio_port)
+    docker run --name=purencool_studio -d -p $VAR_STUDIO_PORT:3000 -t purencool/purencool_studio:latest
     docker ps -f name=purencool_studio | grep -w purencool_studio
-}
 
-### RunningPurencoolStudioSystemPS
-# Remove the studio system docker process
-#
-# @command <rpss>
-#
-##
-function runningPurencoolStudioSystemPS() {
+    VAR_SYSTEM_PORT=$(getConfig system_port)
+    docker run  --name=purencool_studio_system -d -p $VAR_SYSTEM_PORT:3000 -t purencool/purencool_studio_system:latest
     docker ps -f name=purencool_studio_system | grep -w purencool_studio_system
 }
 
-### StartPurencoolStudio
-# Start the studio docker software
+### removeStudio
+# Remove the Studio images.
 #
-# @command <sst>
-#
-##
-function startPurencoolStudio() {
-    echo $(docker start purencool_studio)" has been started"
-    docker ps -f name=purencool_studio | grep -w purencool_studio
-}
-
-### StartPurencoolStudioSystem
-# Start the studio system docker software
-#
-# @command <ssts>
+# @command <removeStudio>
 #
 ##
-function startPurencoolStudioSystem() {
-    echo $(docker start purencool_studio_system)" has been started"
-    docker ps -f name=purencool_studio_system | grep -w purencool_studio_system
+function removeStudio()
+   $(stopStudio)
+   docker rm purencool_studio
+   docker rm purencool_studio_system
+   docker rmi -f $STUDIO_UI
+   docker rmi -f $STUDIO_SYSTEM
 }
 
-### StopPurencoolStudio
-# Stop the studio docker software
+
+### stopStudio
+# Stop the Studio images.
 #
-# @command <ssp>
+# @command <stopStudio>
 #
 ##
-function stopPurencoolStudio() {
-    echo $(docker stop purencool_studio)" has been stopped"
+function removeStudio()
+   docker stop $STUDIO_UI
+   docker stop $STUDIO_SYSTEM
 }
 
-### StopPurencoolStudioSystem
-# Stop the studio system docker software
+
+### startStudio
+# Start the Studio images.
 #
-# @command <ssps>
+# @command <startStudio>
 #
 ##
-function stopPurencoolStudioSystem() {
-    echo $(docker stop purencool_studio_system)" has been stopped"
+function startStudio()
+   docker start $STUDIO_UI
+   docker start $STUDIO_SYSTEM
 }
 
-### StopAndRemovePurencoolStudioPSAndSoftware
-# Remove all PS and Software
-#
-# @command <ra>
-#
-##
-function stopAndRemovePurencoolStudioPSAndSoftware() {
-    stopPurencoolStudio
-    removePurencoolStudioPS
-    removePurencoolStudioSoftware
-    stopPurencoolStudioSystem
-    removePurencoolStudioSystemPS
-    removePurencoolStudioSystemSoftware
 
-}
 
 ###
 # Calling functions
@@ -441,71 +340,20 @@ case $FUNCTION_CALL in
 dockerInstalled) "$@" ;;
 getConfig) "$@" ;;
 help) "$@" ;;
+information) "$@" ;;
 install) "$@" ;;
 installStudio) "$@" ;;
 listCurrentDomains) "$@" ;;
 listPortNumbers) "$@" ;;
+update) "$@";;
 version) "$@" ;;
-'ide')
-    IDEPurencoolStudioPS $FIRST_ARG $SECOND_ARG $THIRD_ARG $FOURTH_ARG
-    ;;
-'ider')
-    IDEPurencoolStudioPSRemove $FIRST_ARG
-    ;;
-'sis')
-    installPurencoolStudioSoftware
-    ;;
-'sis')
-    installPurencoolStudioPS
-    ;;
-'sisp')
-    installPurencoolStudioSystemPS
-    ;;
-'sisap')
-    installPurencoolStudioSoftwareAndPS
-    ;;
-'srp')
-    removePurencoolStudioPS
-    ;;
-'srsp')
-    removePurencoolStudioSystemPS
-    ;;
-'srs')
-    removePurencoolStudioSoftware
-    ;;
-'srss')
-    removePurencoolStudioSystemSoftware
-    ;;
-'rssp')
-    restartPurencoolStudioPS $FIRST_ARG
-    ;;
-'rps')
-    runningPurencoolStudioPS
-    ;;
-'rpss')
-    runningPurencoolStudioSystemPS
-    ;;
-'sst')
-    startPurencoolStudio
-    ;;
-'ssts')
-    startPurencoolStudioSystem
-    ;;
-'ssp')
-    stopPurencoolStudio
-    ;;
-'ssps')
-    stopPurencoolStudioSystem
-    ;;
-'ra')
-    stopAndRemovePurencoolStudioPSAndSoftware
-    ;;
-'update')
-    selfUpdate
-    ;;
-'info')
-    information
-    ;;
+'ide') ide $ARG1 $ARG2 $ARG3 $ARG4;;
+'removeIde') removeIde $ARG1;;
+runStudio) "$@" ;;
+removeStudio) "$@";;
+stopStudio) "$@" ;;
+startStudio) "$@" ;;
+uninstallStudio) "$@";;
 esac
 
 # Makes a cleaner looking result in the terminal
@@ -517,21 +365,12 @@ echo ""
 #
 #   help
 #   installStudio
+#   ide
+#   removeIde
+#   runStudio
+#   stopStudio
+#   startStudio
+#   uninstallStudio
+#   update
 #
-#   IDEPurencoolStudioPS
-#   IDEPurencoolStudioPSRemove
-#   InstallPurencoolStudioPS       <sip>
-#   InstallPurencoolStudioSystemPS <sisp>
-#   RemovePurencoolStudioPS
-#   RemovePurencoolStudioSystemPS  --beta
-#   RemovePurencoolStudioSoftware
-#   RemovePurencoolStudioSystemSoftware --beta
-#   restartPurencoolStudioPS
-#   RunningPurencoolStudioPS
-#   RunningPurencoolStudioSystemPS --beta
-#   StartPurencoolStudio
-#   StartPurencoolStudioSystem --beta
-#   StopPurencoolStudio
-#   StopPurencoolStudioSystem --beta
-#   StopAndRemovePurencoolStudioPSAndSoftware
 ##
