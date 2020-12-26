@@ -177,8 +177,7 @@ function installStudio() {
         exit;
     fi
 
-    echo "Please provide a path for data storage or use "$HOME"/purencool_studio by pressing enter: "
-    read pathToBeUsed
+    read -p "Select a path or use "$HOME"/purencool_studio/sites for app storage: "  pathToBeUsed
 
     mkdir "${HOME}/purencool_studio"
     mkdir "${HOME}/purencool_studio/.system"
@@ -249,7 +248,7 @@ function ide() {
     fi
 
     if [ -z "$4" ]; then
-        VAR_IDE_TYPE="theiaide/theia-php:latest"
+        VAR_IDE_TYPE=$BASE_IDE
     else
         VAR_IDE_TYPE=$4
     fi
@@ -299,7 +298,7 @@ function runStudio(){
 # @command <removeStudio>
 #
 ##
-function removeStudio()
+function removeStudio(){
    $(stopStudio)
    docker rm purencool_studio
    docker rm purencool_studio_system
@@ -314,7 +313,7 @@ function removeStudio()
 # @command <stopStudio>
 #
 ##
-function removeStudio()
+function removeStudio() {
    docker stop $STUDIO_UI
    docker stop $STUDIO_SYSTEM
 }
@@ -326,18 +325,62 @@ function removeStudio()
 # @command <startStudio>
 #
 ##
-function startStudio()
+function startStudio() {
    docker start $STUDIO_UI
    docker start $STUDIO_SYSTEM
 }
 
+######################################################################
+#                    Purencool create site                           #
+######################################################################
 
+### createSite
+# createSite creates the configuration for the site
+#
+# command <createSite>
+##
+function createSite(){
+
+    #domain
+    while true; do
+    read -p 'Continue? yes/no: ' input
+    case $input in
+        [yY]*)
+            echo 'Continuing'
+            break
+            ;;
+        [nN]*)
+            echo 'Ok, exiting'
+            exit 1
+            ;;
+         *)
+            echo 'Invalid input' >&2
+    esac
+done
+
+    #language
+        #version
+
+    #services
+
+    #framework
+
+    #type
+
+    #package manager
+
+    #ide
+
+    #docker image
+
+}
 
 ###
 # Calling functions
 ###
 case $FUNCTION_CALL in
 dockerInstalled) "$@" ;;
+createSite) "$@" ;;
 getConfig) "$@" ;;
 help) "$@" ;;
 information) "$@" ;;
