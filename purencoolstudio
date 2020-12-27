@@ -22,12 +22,12 @@ YELLOW='\033[0;33m' # Yellow
 BLUE='\033[0;34m'   # Blue
 WHITE='\033[0;37m'  # White
 
+
 VERSION="0.10.4"
 RELEASE_NOTES="Added PS starting functionality"
 REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
 PNC_FILENAME=$(dirname "$0")"/purencoolstudio"
 TEMP_FILE_NAME=$(dirname "$0")"/purencoolstudio.tmp"
-
 
 STUDIO_UI="purencool/purencool_studio_system:latest"
 STUDIO_SYSTEM="purencool/purencool_studio:latest"
@@ -40,7 +40,6 @@ function information() {
     echo "VERSION: $VERSION"
     echo "$RELEASE_NOTES"
 }
-
 
 ### install
 # Automates the installation of Studio
@@ -93,9 +92,6 @@ function version() {
     echo -e "The latest version is$YELLOW $NEW_VERSION$NC, and your currently using$YELLOW $THIS_VERSION$NC"
 }
 
-
-
-
 ######################################################################
 #                    Purencool Tools                                 #
 ######################################################################
@@ -104,10 +100,11 @@ function version() {
 #  List all the domains being managed by the system.
 ###
 function listCurrentDomains() {
-   VAR_BASE_PATH=$(getConfig base_path)
-   find $VAR_BASE_PATH"/sites"  -maxdepth 1 -type d
+   local DOMAINS_ONLY=$1
+   local VAR_BASE_PATH=$(getConfig base_path)
+   local paths=($(find $VAR_BASE_PATH"/sites"  -maxdepth 1 -type d))
+   echo ${paths[*]:1}
 }
-
 
 ### listPortNumbers
 #  List all the port numbers being used.
@@ -140,9 +137,6 @@ function dockerInstalled() {
     fi
 }
 
-
-
-
 ######################################################################
 #                    Purencool User Tools                            #
 ######################################################################
@@ -160,7 +154,6 @@ function help() {
 }
 ##
 
-
 ### installStudio
 # Installs Purencool Studio
 #
@@ -174,10 +167,10 @@ function installStudio() {
         echo "  1. https://docs.docker.com/windows/started"
         echo "  2. https://docs.docker.com/mac/started/"
         echo "  3. https://docs.docker.com/windows/started"
-        exit;
+        exit
     fi
 
-    read -p "Select a path or use "$HOME"/purencool_studio/sites for app storage: "  pathToBeUsed
+    read -p "Select a path or use "$HOME"/purencool_studio/sites for app storage: " pathToBeUsed
 
     mkdir "${HOME}/purencool_studio"
     mkdir "${HOME}/purencool_studio/.system"
@@ -218,8 +211,6 @@ function uninstallStudio() {
     rn -Rf "${HOME}/purencool_studio/.config"
     $(removeStudio)
 }
-
-
 
 ### ide
 # Creat a new IDE.
@@ -272,9 +263,7 @@ function removeIde() {
         docker stop $(docker ps -a -q)
         docker rm $(docker ps -a -q)
     fi
-
 }
-
 
 ### runStudio
 # Run the Studio images.
@@ -282,13 +271,13 @@ function removeIde() {
 # @command <runStudio>
 #
 ##
-function runStudio(){
+function runStudio() {
     VAR_STUDIO_PORT=$(getConfig studio_port)
     docker run --name=purencool_studio -d -p $VAR_STUDIO_PORT:3000 -t purencool/purencool_studio:latest
     docker ps -f name=purencool_studio | grep -w purencool_studio
 
     VAR_SYSTEM_PORT=$(getConfig system_port)
-    docker run  --name=purencool_studio_system -d -p $VAR_SYSTEM_PORT:3000 -t purencool/purencool_studio_system:latest
+    docker run --name=purencool_studio_system -d -p $VAR_SYSTEM_PORT:3000 -t purencool/purencool_studio_system:latest
     docker ps -f name=purencool_studio_system | grep -w purencool_studio_system
 }
 
@@ -298,14 +287,13 @@ function runStudio(){
 # @command <removeStudio>
 #
 ##
-function removeStudio(){
-   $(stopStudio)
-   docker rm purencool_studio
-   docker rm purencool_studio_system
-   docker rmi -f $STUDIO_UI
-   docker rmi -f $STUDIO_SYSTEM
+function removeStudio() {
+    $(stopStudio)
+    docker rm purencool_studio
+    docker rm purencool_studio_system
+    docker rmi -f $STUDIO_UI
+    docker rmi -f $STUDIO_SYSTEM
 }
-
 
 ### stopStudio
 # Stop the Studio images.
@@ -314,10 +302,9 @@ function removeStudio(){
 #
 ##
 function removeStudio() {
-   docker stop $STUDIO_UI
-   docker stop $STUDIO_SYSTEM
+    docker stop $STUDIO_UI
+    docker stop $STUDIO_SYSTEM
 }
-
 
 ### startStudio
 # Start the Studio images.
@@ -326,25 +313,31 @@ function removeStudio() {
 #
 ##
 function startStudio() {
-   docker start $STUDIO_UI
-   docker start $STUDIO_SYSTEM
+    docker start $STUDIO_UI
+    docker start $STUDIO_SYSTEM
 }
 
 ######################################################################
 #                    Purencool create site                           #
 ######################################################################
 
+function domainsExist(){
+    arr=( $(listCurrentDomains) )
+    for paths in ${arr[@]}; do
+        echo "$paths"
+    done
+}
+
+
 ### createSite
 # createSite creates the configuration for the site
 #
 # command <createSite>
 ##
-function createSite(){
-
-    #domain
+function createSite() {
     while true; do
-    read -p 'Continue? yes/no: ' input
-    case $input in
+        read -p 'Create a new site? yes/no: ' input
+        case $input in
         [yY]*)
             echo 'Continuing'
             break
@@ -353,13 +346,27 @@ function createSite(){
             echo 'Ok, exiting'
             exit 1
             ;;
-         *)
+        *)
             echo 'Invalid input' >&2
-    esac
-done
+            ;;
+        esac
+    done
+    #domain
+    while true; do
+        read -p 'What is the site called(example.local)?: ' input
+        case $input in
+        [yY]*)
+            echo 'Continuing'
+            break
+            ;;
+        *)
+            echo 'Invalid input' >&2
+            ;;
+        esac
+    done
 
     #language
-        #version
+    #version
 
     #services
 
@@ -380,23 +387,24 @@ done
 ###
 case $FUNCTION_CALL in
 dockerInstalled) "$@" ;;
+domainsExist)  domainsExist ;;
 createSite) "$@" ;;
 getConfig) "$@" ;;
 help) "$@" ;;
 information) "$@" ;;
 install) "$@" ;;
 installStudio) "$@" ;;
-listCurrentDomains) "$@" ;;
+listCurrentDomains) listCurrentDomains $ARG1 ;;
 listPortNumbers) "$@" ;;
-update) "$@";;
+update) "$@" ;;
 version) "$@" ;;
-'ide') ide $ARG1 $ARG2 $ARG3 $ARG4;;
-'removeIde') removeIde $ARG1;;
+ide) ide $ARG1 $ARG2 $ARG3 $ARG4 ;;
+removeIde) removeIde $ARG1 ;;
 runStudio) "$@" ;;
-removeStudio) "$@";;
+removeStudio) "$@" ;;
 stopStudio) "$@" ;;
 startStudio) "$@" ;;
-uninstallStudio) "$@";;
+uninstallStudio) "$@" ;;
 esac
 
 # Makes a cleaner looking result in the terminal
