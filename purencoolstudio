@@ -344,9 +344,7 @@ function domainsExist() {
     local DOMAIN_EXISTS='false'
     if [ "$FIND_DOMAIN" == "all" ]; then
         arr=($(listCurrentDomains -p))
-        for paths in ${arr[@]}; do
-            echo "$paths"
-        done
+        echo ${arr[@]}
     else
         arr=($(listCurrentDomains))
         for paths in ${arr[@]}; do
@@ -365,32 +363,21 @@ function domainsExist() {
 # command <createSite>
 ##
 function createSite() {
+    #Domain
     while true; do
-        read -p 'Create a new site? yes/no: ' input
-        case $input in
-        [yY]*)
-            echo 'Continuing'
-            break
+        read -p 'What is the site called(example.local)?: ' domain_input
+        local DOMAIN_CHECK=$(domainsExist $domain_input)
+        case $DOMAIN_CHECK in
+            "false")
+                echo 'Continuing'
+                break
             ;;
-        [nN]*)
-            echo 'Ok, exiting'
-            exit 1
-            ;;
-        *)
-            echo 'Invalid input' >&2
-            ;;
-        esac
-    done
-    #domain
-    while true; do
-        read -p 'What is the site called(example.local)?: ' input
-        case $input in
-        [yY]*)
-            echo 'Continuing'
-            break
-            ;;
-        *)
-            echo 'Invalid input' >&2
+            *)
+                echo -e "$YELLOW""Domain exists try again $NC"
+                for paths in ${DOMAIN_CHECK[@]}; do
+                    echo $paths;
+                done
+                echo  >&2
             ;;
         esac
     done
