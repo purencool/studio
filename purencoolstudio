@@ -22,7 +22,6 @@ YELLOW='\033[0;33m' # Yellow
 BLUE='\033[0;34m'   # Blue
 WHITE='\033[0;37m'  # White
 
-
 VERSION="0.10.4"
 RELEASE_NOTES="Added PS starting functionality"
 REQUEST_URL="https://raw.githubusercontent.com/purencool/studio/main/purencoolstudio"
@@ -100,10 +99,15 @@ function version() {
 #  List all the domains being managed by the system.
 ###
 function listCurrentDomains() {
-   local DOMAINS_ONLY=$1
-   local VAR_BASE_PATH=$(getConfig base_path)
-   local paths=($(find $VAR_BASE_PATH"/sites"  -maxdepth 1 -type d))
-   echo ${paths[*]:1}
+    local DOMAINS_ONLY=$1
+    local VAR_BASE_PATH=$(getConfig base_path)
+    if [ "$DOMAINS_ONLY" == "-p" ]; then
+        local paths=($(find $VAR_BASE_PATH"/sites" -maxdepth 1 -type d))
+        echo ${paths[*]:1}
+    else
+        local paths=($(ls $VAR_BASE_PATH"/sites"))
+        echo ${paths[*]}
+    fi
 }
 
 ### listPortNumbers
@@ -149,7 +153,7 @@ function dockerInstalled() {
 # 2.  <purencoolstudio help <title eg, Help >> to see item
 #
 function help() {
-    VAR_ARR=$(sed -e "/### $FIRST_ARG/,/##/!d" $PNC_FILENAME)
+    local VAR_ARR=$(sed -e "/### $1/,/##/!d" $PNC_FILENAME)
     echo -e "$YELLOW$VAR_ARR$NC"
 }
 ##
@@ -321,13 +325,39 @@ function startStudio() {
 #                    Purencool create site                           #
 ######################################################################
 
-function domainsExist(){
-    arr=( $(listCurrentDomains) )
-    for paths in ${arr[@]}; do
-        echo "$paths"
-    done
+### domainsExist
+# Displays all installed domains on the system or searches for a single
+# domain
+#
+# command
+#        <domainsExist>
+# flags
+#       <all> Display all domains on the system
+#
+# echo
+#     1. All domains with complete paths
+#     2. Returns domain if it exists
+#     3. Domain exits
+##
+function domainsExist() {
+    local FIND_DOMAIN=$1
+    local DOMAIN_EXISTS='false'
+    if [ "$FIND_DOMAIN" == "all" ]; then
+        arr=($(listCurrentDomains -p))
+        for paths in ${arr[@]}; do
+            echo "$paths"
+        done
+    else
+        arr=($(listCurrentDomains))
+        for paths in ${arr[@]}; do
+            if [ "$FIND_DOMAIN" == "$paths" ]; then
+                DOMAIN_EXISTS=$paths
+                break
+            fi
+        done
+        echo $DOMAIN_EXISTS
+    fi
 }
-
 
 ### createSite
 # createSite creates the configuration for the site
@@ -387,10 +417,10 @@ function createSite() {
 ###
 case $FUNCTION_CALL in
 dockerInstalled) "$@" ;;
-domainsExist)  domainsExist ;;
+domainsExist) domainsExist $ARG1 ;;
 createSite) "$@" ;;
 getConfig) "$@" ;;
-help) "$@" ;;
+help) help $ARG1 ;;
 information) "$@" ;;
 install) "$@" ;;
 installStudio) "$@" ;;
@@ -414,6 +444,7 @@ echo ""
 #  The list below are functions that can be used to help manage Purencool Studio
 #  from the commandline. To use the command type <purencoolstudio help <title eg, Help >>
 #
+#   domainsExist
 #   help
 #   installStudio
 #   ide
