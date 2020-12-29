@@ -110,6 +110,14 @@ function listCurrentDomains() {
     fi
 }
 
+### activeDomains
+#  List all the active domains for users applications
+###
+function activeDomains() {
+    echo "http://localhost:"
+}
+
+
 ### listPortNumbers
 #  List all the port numbers being used.
 ###
@@ -249,7 +257,7 @@ function ide() {
     fi
 
     docker run -it -d -p $VAR_IDE_PORT:3000 --name=$VAR_IDE_NAME -v "$VAR_BASE_PATH:/home/project:cached" $VAR_IDE_TYPE
-    echo "http://localhost:$VAR_IDE_PORT"
+    echo $(activeDomains)"$VAR_IDE_PORT"
 }
 
 ### removeIde
@@ -305,9 +313,9 @@ function removeStudio() {
 # @command <stopStudio>
 #
 ##
-function removeStudio() {
-    docker stop $STUDIO_UI
-    docker stop $STUDIO_SYSTEM
+function stopStudio() {
+    docker stop purencool_studio && docker stop purencool_studio_system
+    echo -e "$YELLOW""Purencool studio has now stopped $NC"
 }
 
 ### startStudio
@@ -317,8 +325,10 @@ function removeStudio() {
 #
 ##
 function startStudio() {
-    docker start $STUDIO_UI
-    docker start $STUDIO_SYSTEM
+    docker start purencool_studio && docker start purencool_studio_system
+    echo -e "$YELLOW""Purencool studio has now started $NC"
+    STUDIO_PORT=$(getConfig studio_port)
+    echo $(activeDomains)"$STUDIO_PORT"
 }
 
 ######################################################################
@@ -357,6 +367,27 @@ function domainsExist() {
     fi
 }
 
+
+### language
+# Select a system language and a version
+#
+# command
+#        <language>
+# variables
+#       <version>
+#
+# echo array ( language version )
+#
+##
+function language(){
+    local LANGUAGE=$1
+    local VERSION=$2
+
+    arr=("PHP" "7.4")
+    echo ${arr[@]}
+
+}
+
 ### createSite
 # createSite creates the configuration for the site
 #
@@ -382,18 +413,31 @@ function createSite() {
         esac
     done
 
-    #language
-    #version
+    #language and version @todo
 
-    #services
+    #services @todo eg search
 
-    #framework
+    #framework and version @todo
 
-    #type
-
-    #package manager
+    #package manager @todo composer
 
     #ide
+    while true; do
+        read -p 'Do you need an for this application[Yy/Nn]?: ' ide_input
+        case $ide_input in
+            [Yy]*)
+                echo 'Installing and IDE'
+                break
+            ;;
+            [Nn]*)
+                echo 'Not installing an IDE'
+                break
+            ;;
+            *)
+                echo -e "$YELLOW""Sorry we need a Y or N  $NC"  >&2
+            ;;
+        esac
+    done
 
     #docker image
 
