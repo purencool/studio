@@ -174,7 +174,7 @@ function help() {
 function installStudio() {
     echo "Current path: "$(pwd)
     dockerDi=$(dockerInstalled)
-    if [ "$dockerDi" = 'true' ]; then
+    if [ "$dockerDi" = 'false' ]; then
         echo "In order to run this container you'll need docker installed."
         echo -e "$RED""Purencool Studio won't be installed until docker is installed $NC"
         echo "  1. https://docs.docker.com/windows/started"
