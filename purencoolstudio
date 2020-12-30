@@ -142,7 +142,8 @@ function getConfig() {
 #
 ###
 function dockerInstalled() {
-    if echo "$(docker -v)" | grep -q "version"; then
+    local DOCKER_INSTALLED=$(docker -v | grep -c "version")
+    if [[ "$DOCKER_INSTALLED" == 1 ]]; then
         echo "true"
     else
         echo "false"
