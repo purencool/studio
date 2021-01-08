@@ -294,6 +294,7 @@ function runStudio() {
     docker ps -f name=purencool_studio_system | grep -w purencool_studio_system
 }
 
+
 ### removeStudio
 # Remove the Studio images.
 #
