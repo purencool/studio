@@ -198,6 +198,10 @@ function installStudio() {
     echo "studio_port::7000" >>${HOME}/purencool_studio/.config/config
     echo "system_port::7001" >>${HOME}/purencool_studio/.config/config
     echo "httpd_port::7002" >>${HOME}/purencool_studio/.config/config
+    echo "db_port::7003" >>${HOME}/purencool_studio/.config/config
+    echo "db_password::qqqq" >>${HOME}/purencool_studio/.config/config
+
+    
 
     if [ -z "$pathToBeUsed" ]; then
         echo "base_path::"${HOME}/purencool_studio >>${HOME}/purencool_studio/.config/config
@@ -280,7 +284,7 @@ function removeIde() {
 }
 
 
-### studio httpd 
+### shttpd 
 # Creat a new studiohttpd.
 #
 # @command <shttpd>
@@ -295,26 +299,61 @@ function shttpd() {
     fi
 
     if [ -z "$2" ]; then
-        VAR_IDE_PORT=$(getConfig httpd_port)
+        VAR_HTTPD_PORT=$(getConfig httpd_port)
     else
-        VAR_IDE_PORT=$2
+        VAR_HTTPD_PORT=$2
     fi
 
     if [ -z "$3" ]; then
-        VAR_IDE_NAME="purencool_studio_httpd_"$((RANDOM % 40))
+        VAR_HTTPD_NAME="purencool_studio_httpd_"$((RANDOM % 40))
     else
-        VAR_IDE_NAME=$3
+        VAR_HTTPD_NAME=$3
+    fi
+
+    docker run -it -d -p $VAR_HTTPD_PORT:8080 --mount type=bind,source=$VAR_BASE_PATH,target=/var/www/html --name=$VAR_HTTPD_NAME  purencool/purencool_httpd:latest
+ 
+}
+
+
+### sdb 
+# Creat a new studio db.
+#
+# @command <sdb>
+#
+##
+function sdb() {
+
+    if [ -z "$1" ]; then
+        VAR_BASE_PATH=$(getConfig base_path)
+    else
+        VAR_BASE_PATH=$1
+    fi
+
+    if [ -z "$2" ]; then
+        VAR_DB_PORT=$(getConfig db_port)
+    else
+        VAR_DB_PORT=$2
+    fi
+
+    if [ -z "$3" ]; then
+        VAR_DB_NAME="purencool_studio_db_"$((RANDOM % 40))
+    else
+        VAR_DB_NAME=$3
     fi
 
     if [ -z "$4" ]; then
-        VAR_IDE_TYPE=$BASE_IDE
+        VAR_DB_PASSWORD=$(getConfig db_password)
     else
-        VAR_IDE_TYPE=$4
+        VAR_DB_PASSWORD=$4
     fi
 
-    docker run -it -d -p $VAR_IDE_PORT:3000 --name=$VAR_IDE_NAME -v "$VAR_BASE_PATH:/home/project:cached" $VAR_IDE_TYPE
-    echo $(activeDomains)"$VAR_IDE_PORT"
+
+    docker run -it -d  -p $VAR_DB_PORT:3306 --mount type=bind,source=$VAR_BASE_PATH,target=/var/lib/mysql -e MYSQL_ROOT_PASSWORD=$VAR_DB_PASSWORD --name=$VAR_DB_NAME purencool/purencool_db:latest
+
+
 }
+
+
 
 
 ###  networkStudio 
@@ -332,6 +371,18 @@ function networkStudio() {
 }
 
 
+###  networkAddContainer 
+#  networkAddContainer
+#
+# @command <networkAddContainer>
+#
+##
+function networkAddContainer() {
+    local DOCKER_ADD_NETWORK=$1
+    echo $DOCKER_ADD_NETWORK" this is a test";
+#    docker network connect purencool_network $DOCKER_ADD_NETWORK
+    
+}
 ### runStudio
 # Run the Studio images.
 #
@@ -517,10 +568,12 @@ update) "$@" ;;
 version) "$@" ;;
 ide) ide $ARG1 $ARG2 $ARG3 $ARG4 ;;
 networkStudio) networkStudio ;;
+networkAddContainer) networkAddContainer $ARG1;;
 removeIde) removeIde $ARG1 ;;
 runStudio) "$@" ;;
 removeStudio) "$@" ;;
-shttpd) shttpd $ARG1 $ARG2 $ARG3 $ARG4;;
+sdb)  sdb  $ARG1 $ARG2 $ARG3 $ARG4;;
+shttpd) shttpd $ARG1 $ARG2 $ARG3;;
 stopStudio) "$@" ;;
 startStudio) "$@" ;;
 uninstallStudio) "$@" ;;
