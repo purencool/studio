@@ -197,6 +197,7 @@ function installStudio() {
     echo "ide_port::3001" >>${HOME}/purencool_studio/.config/config
     echo "studio_port::7000" >>${HOME}/purencool_studio/.config/config
     echo "system_port::7001" >>${HOME}/purencool_studio/.config/config
+    echo "httpd_port::7002" >>${HOME}/purencool_studio/.config/config
 
     if [ -z "$pathToBeUsed" ]; then
         echo "base_path::"${HOME}/purencool_studio >>${HOME}/purencool_studio/.config/config
@@ -277,6 +278,59 @@ function removeIde() {
         docker rm $(docker ps -a -q)
     fi
 }
+
+
+### studio httpd 
+# Creat a new studiohttpd.
+#
+# @command <shttpd>
+#
+##
+function shttpd() {
+
+    if [ -z "$1" ]; then
+        VAR_BASE_PATH=$(getConfig base_path)
+    else
+        VAR_BASE_PATH=$1
+    fi
+
+    if [ -z "$2" ]; then
+        VAR_IDE_PORT=$(getConfig httpd_port)
+    else
+        VAR_IDE_PORT=$2
+    fi
+
+    if [ -z "$3" ]; then
+        VAR_IDE_NAME="purencool_studio_httpd_"$((RANDOM % 40))
+    else
+        VAR_IDE_NAME=$3
+    fi
+
+    if [ -z "$4" ]; then
+        VAR_IDE_TYPE=$BASE_IDE
+    else
+        VAR_IDE_TYPE=$4
+    fi
+
+    docker run -it -d -p $VAR_IDE_PORT:3000 --name=$VAR_IDE_NAME -v "$VAR_BASE_PATH:/home/project:cached" $VAR_IDE_TYPE
+    echo $(activeDomains)"$VAR_IDE_PORT"
+}
+
+
+###  networkStudio 
+#  networkStudio.
+#
+# @command <networkStudio>
+#
+##
+function networkStudio() {
+
+    local DOCKER_NETWORK=$(docker network ls | grep -c  "purencool_network")
+    if [[ "$DOCKER_NETWORK" == 0 ]]; then 
+       docker network create --driver bridge purencool_network
+    fi
+}
+
 
 ### runStudio
 # Run the Studio images.
@@ -462,9 +516,11 @@ listPortNumbers) "$@" ;;
 update) "$@" ;;
 version) "$@" ;;
 ide) ide $ARG1 $ARG2 $ARG3 $ARG4 ;;
+networkStudio) networkStudio ;;
 removeIde) removeIde $ARG1 ;;
 runStudio) "$@" ;;
 removeStudio) "$@" ;;
+shttpd) shttpd $ARG1 $ARG2 $ARG3 $ARG4;;
 stopStudio) "$@" ;;
 startStudio) "$@" ;;
 uninstallStudio) "$@" ;;
